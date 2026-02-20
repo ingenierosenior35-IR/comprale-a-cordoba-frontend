@@ -1,0 +1,21 @@
+.product-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 0 28px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.product-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+
+.product-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.product-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}

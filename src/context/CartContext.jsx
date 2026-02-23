@@ -28,7 +28,7 @@ export function CartProvider({ children }) {
     setItems(newItems);
   };
 
-  const addItem = (product, sellerId, quantity = 1) => {
+  const addItem = (product, sellerId, quantity = 1, sellerName = '') => {
     setItems((prev) => {
       const exists = prev.find((i) => i.product.id === product.id);
       const updated = exists
@@ -37,7 +37,7 @@ export function CartProvider({ children }) {
               ? { ...i, quantity: i.quantity + quantity }
               : i
           )
-        : [...prev, { product, sellerId, quantity }];
+        : [...prev, { product, sellerId, sellerName, quantity }];
       return updated;
     });
   };

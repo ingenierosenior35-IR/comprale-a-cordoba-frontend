@@ -3,6 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../../context/CartContext';
+import graphqlClient from '../../lib/graphqlClient';
+import {
+  CREATE_GUEST_CART,
+  ADD_PRODUCTS_TO_CART,
+  SET_GUEST_EMAIL,
+  SET_SHIPPING_ADDRESS,
+  SET_PAYMENT_METHOD,
+  PLACE_ORDER,
+} from '../../graphql/checkout/mutations';
 import Navbar from '../Navbar/Navbar';
 import './Checkout.css';
 
@@ -18,8 +27,6 @@ const DEPARTMENTS = [
 const formatPrice = (price) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(price);
 
-const REQUIRED_FIELDS = ['email', 'firstName', 'lastName', 'cedula', 'cedNum', 'phone', 'department', 'city', 'address'];
-
 export default function CheckoutForm() {
   const router = useRouter();
   const { items, total, updateQuantity, clearCart } = useCart();
@@ -32,6 +39,7 @@ export default function CheckoutForm() {
   });
   const [errors, setErrors] = useState({});
   const [processing, setProcessing] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -61,10 +69,46 @@ export default function CheckoutForm() {
       return;
     }
     setProcessing(true);
-    // Simulate processing
-    await new Promise((r) => setTimeout(r, 1500));
-    clearCart();
-    router.push('/checkout/confirmation');
+    setSubmitError('');
+    try {
+      // 1. Create guest cart
+      const cartData = await graphqlClient.request(CREATE_GUEST_CART);
+      const cartId = cartData.createEmptyCart;
+
+      // 2. Add products to cart
+      const cartItems = items.map((i) => ({ sku: String(i.product.id), quantity: i.quantity }));
+      await graphqlClient.request(ADD_PRODUCTS_TO_CART, { cartId, cartItems });
+
+      // 3. Set guest email
+      await graphqlClient.request(SET_GUEST_EMAIL, { cartId, email: form.email });
+
+      // 4. Set shipping address
+      await graphqlClient.request(SET_SHIPPING_ADDRESS, {
+        cartId,
+        firstname: form.firstName,
+        lastname: form.lastName,
+        street: form.address,
+        city: form.city,
+        region: form.department,
+        postcode: '000000',
+        telephone: form.phone,
+      });
+
+      // 5. Set payment method
+      await graphqlClient.request(SET_PAYMENT_METHOD, { cartId });
+
+      // 6. Place order
+      const orderData = await graphqlClient.request(PLACE_ORDER, { cartId });
+      const orderNumber = orderData?.placeOrder?.order?.order_number || '';
+
+      // 7. Clear cart and redirect
+      clearCart();
+      router.push(`/checkout/confirmation?order=${orderNumber}`);
+    } catch (err) {
+      console.error('Checkout error:', err);
+      setSubmitError('Hubo un error al procesar tu pedido. Por favor intenta de nuevo.');
+      setProcessing(false);
+    }
   };
 
   if (items.length === 0 && !processing) {
@@ -84,6 +128,11 @@ export default function CheckoutForm() {
       <Navbar />
       <main className="checkout__main">
         <h1 className="checkout__title">Finalizar compra</h1>
+        {submitError && (
+          <div style={{ background: 'rgba(232,54,61,0.15)', border: '1px solid #e8363d', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', color: '#e8363d' }}>
+            {submitError}
+          </div>
+        )}
         <form className="checkout__grid" onSubmit={handleSubmit} noValidate>
 
           {/* Column 1: Address */}
@@ -186,16 +235,16 @@ export default function CheckoutForm() {
                 <span className="checkout__radio-dot" aria-hidden="true" />
               </div>
               <div className="checkout__shipping-info">
-                <span className="checkout__shipping-name">Inter Rapidísimo</span>
-                <span className="checkout__shipping-price">$0 — Gratis</span>
+                <span className="checkout__shipping-name">Interrapidísimo</span>
+                <span className="checkout__shipping-price">Gratis $0</span>
               </div>
             </div>
 
             <div className="checkout__section-label" style={{ marginTop: '24px' }}>Métodos de pago</div>
             <div className="checkout__payment-card">
-              <p className="checkout__payment-text">Pago en línea PSE y tarjetas de crédito</p>
+              <p className="checkout__payment-text">Pago en línea</p>
               <div className="checkout__payment-logos" aria-label="Métodos de pago aceptados">
-                {['Nequi', 'ADDI', 'VISA', 'Mastercard', 'Google Pay', 'Apple Pay'].map((m) => (
+                {['PSE', 'Nequi', 'VISA', 'Mastercard', 'Google Pay'].map((m) => (
                   <span key={m} className="checkout__payment-logo">{m}</span>
                 ))}
               </div>

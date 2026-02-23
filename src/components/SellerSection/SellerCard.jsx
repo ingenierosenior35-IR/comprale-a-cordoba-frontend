@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import ProductScrollList from './ProductScrollList';
 import './SellerCard.css';
 
 function SellerCard({ seller, onViewDetail }) {
   const [offset, setOffset] = useState(0);
+  const router = useRouter();
   const visibleCount = 3;
   const canPrev = offset > 0;
   const canNext = offset + visibleCount < seller.products.length;
@@ -13,6 +15,8 @@ function SellerCard({ seller, onViewDetail }) {
   const handlePrev = () => setOffset((o) => Math.max(0, o - 1));
   const handleNext = () =>
     setOffset((o) => Math.min(Math.max(0, seller.products.length - visibleCount), o + 1));
+
+  const handleSellerNav = () => router.push(`/seller/${seller.id}`);
 
   return (
     <article className="seller-card">
@@ -22,10 +26,18 @@ function SellerCard({ seller, onViewDetail }) {
           src={seller.image}
           alt={`Portada de ${seller.name}`}
           loading="lazy"
+          onClick={handleSellerNav}
+          style={{ cursor: 'pointer' }}
         />
         <div className="seller-card__overlay">
           <span className="seller-card__category">{seller.category}</span>
-          <h3 className="seller-card__name">{seller.name}</h3>
+          <h3
+            className="seller-card__name"
+            onClick={handleSellerNav}
+            style={{ cursor: 'pointer' }}
+          >
+            {seller.name}
+          </h3>
           <p className="seller-card__description">{seller.description}</p>
           <div className="seller-card__meta">
             <span className="seller-card__rating" aria-label={`Calificación: ${seller.rating}`}>
@@ -58,6 +70,8 @@ function SellerCard({ seller, onViewDetail }) {
           products={seller.products}
           offset={offset}
           visibleCount={visibleCount}
+          sellerId={seller.id}
+          sellerName={seller.name}
         />
 
         <button

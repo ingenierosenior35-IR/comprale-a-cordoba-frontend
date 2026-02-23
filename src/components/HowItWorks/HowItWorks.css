@@ -1,6 +1,6 @@
 .how-it-works {
   padding: 56px 32px 48px 32px;
-  background-color: var(--color-primary);
+  background-color: var(--color-bg);
   text-align: center;
 }
 
@@ -8,7 +8,7 @@
   font-family: 'PP Neue Montreal', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-weight: 450;
   font-size: 42px;
-  color: var(--color-text-dark);
+  color: #ffffff;
   margin-bottom: 32px;
   margin-top: 0;
   letter-spacing: -0.02em;
@@ -39,7 +39,7 @@
   font-family: 'PP Neue Montreal', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-weight: 400;
   font-size: 42px;
-  color: var(--color-text-dark);
+  color: #ffffff;
   line-height: 1;
   white-space: nowrap;
   flex-shrink: 0;
@@ -60,7 +60,7 @@
   font-family: 'PP Neue Montreal', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-weight: 500;
   font-size: 15px;
-  color: var(--color-text-medium);
+  color: rgba(255,255,255,0.7);
   line-height: 1.4;
   margin: 0;
   white-space: normal;

@@ -3,12 +3,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-primary);
+  background: #1d1d1f;
   padding: 40px 20px;
 }
 
 .confirm__card {
-  background: #fff;
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: var(--radius-lg);
   padding: 48px 40px;
   max-width: 480px;
@@ -25,25 +26,25 @@
 .confirm__title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--color-text-dark);
+  color: #ffffff;
   margin-bottom: 12px;
 }
 
 .confirm__subtitle {
   font-size: 0.95rem;
-  color: var(--color-text-medium);
+  color: rgba(255,255,255,0.6);
   margin-bottom: 10px;
 }
 
 .confirm__shipping {
   font-size: 0.9rem;
-  color: var(--color-text-medium);
+  color: rgba(255,255,255,0.6);
   margin-bottom: 32px;
 }
 
 .confirm__btn {
-  background: #2d2d2d;
-  color: #fff;
+  background: #fbfbed;
+  color: #1a1a2e;
   border: none;
   border-radius: var(--radius-sm);
   padding: 14px 36px;

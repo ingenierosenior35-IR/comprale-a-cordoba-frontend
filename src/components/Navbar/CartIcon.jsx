@@ -1,3 +1,5 @@
+'use client';
+
 import './CartIcon.css';
 
 const CART_COUNT = 2;

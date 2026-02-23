@@ -1,5 +1,7 @@
+'use client';
+
 import { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import Navbar from '../components/Navbar/Navbar';
 import Hero from '../components/Hero/Hero';
 import HowItWorks from '../components/HowItWorks/HowItWorks';
@@ -7,14 +9,14 @@ import SellerSection from '../components/SellerSection/SellerSection';
 import Stats from '../components/Stats/Stats';
 import Footer from '../components/Footer/Footer';
 import { sellers, stats, sponsors } from '../data/mockData';
-import './HomePage.css';
+import './home.css';
 
-function HomePage() {
+export default function HomePage() {
   const howItWorksSectionRef = useRef(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSellerClick = (seller) => {
-    navigate(`/seller/${seller.id}`);
+    router.push(`/seller/${seller.id}`);
   };
 
   return (
@@ -30,5 +32,3 @@ function HomePage() {
     </div>
   );
 }
-
-export default HomePage;

@@ -1,6 +1,6 @@
 # Cómprale a Córdoba - Frontend
 
-A React + Vite web application connecting buyers with local businesses from the Córdoba department of Colombia. The platform showcases sellers, their products, and supports local commerce.
+A React + **Next.js** web application connecting buyers with local businesses from the Córdoba department of Colombia. The platform showcases sellers, their products, and supports local commerce.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ npm install
 npm run dev
 ```
 
-Runs at [http://localhost:5173](http://localhost:5173)
+Runs at [http://localhost:3000](http://localhost:3000)
 
 ## Build
 
@@ -26,10 +26,10 @@ Runs at [http://localhost:5173](http://localhost:5173)
 npm run build
 ```
 
-## Preview
+## Start (production)
 
 ```bash
-npm run preview
+npm start
 ```
 
 ## Environment Variables
@@ -40,20 +40,28 @@ No environment variables are required.
 
 ```
 src/
+├── app/
+│   ├── layout.js            # Root layout (imports global CSS)
+│   ├── page.js              # Home page (/)
+│   ├── home.css             # Home page styles
+│   └── seller/
+│       └── [id]/
+│           └── page.js      # Seller detail page (/seller/:id)
 ├── components/
-│   ├── Footer/          # Footer with sponsors
-│   ├── Hero/            # Landing hero section
-│   ├── HowItWorks/      # Step-by-step guide section
-│   ├── Navbar/          # Navigation bar with dual-tab search and cart
-│   ├── SellerDetail/    # Seller detail modal component
-│   ├── SellerSection/   # Seller cards carousel section
-│   └── Stats/           # Impact statistics section
+│   ├── Footer/              # Footer with sponsors
+│   ├── Hero/                # Landing hero section
+│   ├── HowItWorks/          # Step-by-step guide section
+│   ├── Navbar/              # Floating glassmorphism navbar with segmented search
+│   ├── SellerDetail/        # Seller detail component
+│   ├── SellerSection/       # Seller cards carousel section
+│   └── Stats/               # Impact statistics section
 ├── data/
-│   └── mockData.js      # Mock sellers, stats and sponsors data
+│   └── mockData.js          # Mock sellers, stats and sponsors data
 ├── pages/
-│   ├── HomePage.jsx     # Main landing page
-│   └── SellerDetailPage.jsx  # Full seller detail page (/seller/:id)
-├── App.jsx              # Router and top-level component
-├── index.css            # Global CSS variables and base styles
-└── main.jsx             # Entry point
+│   └── SellerDetailPage.css # Seller detail page styles (shared)
+└── index.css                # Global CSS variables and base styles
+public/
+└── brand/
+    └── inter.svg            # Inter Rapidísimo logo
 ```
+

@@ -1,4 +1,7 @@
+'use client';
+
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import './MenuDropdown.css';
 
 const menuItems = [
@@ -40,9 +43,9 @@ function MenuDropdown() {
         <ul className="menu-dropdown__list" role="menu">
           {menuItems.map((item) => (
             <li key={item.label} className="menu-dropdown__item" role="menuitem">
-              <a href={item.path} onClick={() => setIsOpen(false)}>
+              <Link href={item.path} onClick={() => setIsOpen(false)}>
                 {item.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

@@ -1,13 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
+import { createPortal } from 'react-dom';
 import { useCart } from '../../context/CartContext';
 import CartDrawer from '../Cart/CartDrawer';
 import './CartIcon.css';
 
+const emptySubscribe = () => () => {};
+function useIsClient() {
+  return useSyncExternalStore(emptySubscribe, () => true, () => false);
+}
+
 function CartIcon() {
   const { items } = useCart();
   const [open, setOpen] = useState(false);
+  const isClient = useIsClient();
   const count = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
@@ -32,7 +39,10 @@ function CartIcon() {
           <span className="cart-icon__badge" aria-hidden="true">{count}</span>
         )}
       </button>
-      <CartDrawer open={open} onClose={() => setOpen(false)} />
+      {isClient && createPortal(
+        <CartDrawer open={open} onClose={() => setOpen(false)} />,
+        document.body
+      )}
     </>
   );
 }

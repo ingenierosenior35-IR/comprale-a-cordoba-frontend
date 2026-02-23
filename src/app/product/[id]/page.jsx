@@ -1,9 +1,11 @@
+import { use } from 'react';
 import { sellers } from '../../../data/mockData';
 import ProductDetailClient from '../../../components/ProductDetail/ProductDetailClient';
 
 export default function ProductDetailPage({ params, searchParams }) {
-  const { id } = params;
-  const sellerId = searchParams?.seller ? String(searchParams.seller) : null;
+  const { id } = use(params);
+  const resolvedSearch = use(searchParams);
+  const sellerId = resolvedSearch?.seller ? String(resolvedSearch.seller) : null;
 
   // Find the product across all sellers
   let product = null;

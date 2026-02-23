@@ -17,6 +17,8 @@ function adaptSeller(item) {
     name: seller.shop_title,
     description: stripHtml(seller.description),
     image: seller.banner_pic || seller.logo_pic || '',
+    category: '',
+    rating: null,
     products: (products?.items || []).map((p) => ({
       id: p.sku,
       name: p.name,

@@ -67,7 +67,7 @@ export default function SellerDetailPage({ params }) {
             </h2>
             <div className="sdp-products__grid" role="list" aria-label={`Productos de ${seller.name}`}>
               {seller.products.map((product) => (
-                <ProductItem key={product.id} product={product} large />
+                <ProductItem key={product.id} product={product} sellerId={seller.id} large />
               ))}
             </div>
           </div>

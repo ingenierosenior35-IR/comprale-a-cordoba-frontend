@@ -1,4 +1,7 @@
+import '../styles/globals.css';
 import '../index.css';
+import ReactQueryProvider from '../providers/ReactQueryProvider';
+import { CartProvider } from '../context/CartContext';
 
 export const metadata = {
   title: 'Cómprale a Córdoba',
@@ -8,7 +11,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        <ReactQueryProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </ReactQueryProvider>
+      </body>
     </html>
   );
 }

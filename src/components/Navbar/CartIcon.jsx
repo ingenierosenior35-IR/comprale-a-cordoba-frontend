@@ -1,12 +1,14 @@
 'use client';
 
+import { useCart } from '../../context/CartContext';
 import './CartIcon.css';
 
-const CART_COUNT = 2;
-
 function CartIcon() {
+  const { items } = useCart();
+  const count = items.reduce((sum, i) => sum + i.quantity, 0);
+
   return (
-    <button className="cart-icon" aria-label={`Carrito de compras, ${CART_COUNT} artículos`}>
+    <button className="cart-icon" aria-label={`Carrito de compras, ${count} artículos`}>
       <svg
         width="26"
         height="26"
@@ -22,7 +24,9 @@ function CartIcon() {
         <circle cx="20" cy="21" r="1" />
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
       </svg>
-      <span className="cart-icon__badge" aria-hidden="true">{CART_COUNT}</span>
+      {count > 0 && (
+        <span className="cart-icon__badge" aria-hidden="true">{count}</span>
+      )}
     </button>
   );
 }

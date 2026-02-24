@@ -17,7 +17,7 @@ const SELLER_PLACEHOLDER = 'https://via.placeholder.com/400x300?text=Negocio';
 const PRODUCT_PLACEHOLDER = 'https://via.placeholder.com/200x200?text=Producto';
 
 function stripHtml(html) {
-  return (html || '').replace(/[<>]/g, ' ').replace(/\s+/g, ' ').trim();
+  return (html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 function mapSellers(items) {

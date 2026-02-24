@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { sellers as mockSellers, sponsors } from '../../../data/mockData';
 import { useProductsBySeller } from '../../../hooks/useProductsBySeller';
 import { useCart } from '../../../context/CartContext';
+import ClientProviders from '../../../providers/ClientProviders';
 import Navbar from '../../../components/Navbar/Navbar';
 import Footer from '../../../components/Footer/Footer';
 import '../../../pages/SellerDetailPage.css';
@@ -12,8 +13,7 @@ import '../../../pages/SellerDetailPage.css';
 const formatPrice = (price) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(price);
 
-export default function SellerDetailPage({ params }) {
-  const { id } = use(params);
+function SellerDetailContent({ id }) {
   const router = useRouter();
   const { addItem } = useCart();
 
@@ -21,7 +21,6 @@ export default function SellerDetailPage({ params }) {
 
   const mockSeller = mockSellers.find((s) => String(s.id) === id);
 
-  // Use API data or fall back to mock
   const apiProducts =
     !isError && !isLoading && data?.productsBySeller?.items?.length
       ? data.productsBySeller.items.map((p) => ({
@@ -66,7 +65,6 @@ export default function SellerDetailPage({ params }) {
     <div className="seller-detail-page" style={{ background: '#1d1d1f', minHeight: '100vh' }}>
       <Navbar />
       <main>
-        {/* Hero banner */}
         <header className="sdp-hero" style={{ height: '380px', position: 'relative', overflow: 'hidden' }}>
           <img
             className="sdp-hero__image"
@@ -92,7 +90,6 @@ export default function SellerDetailPage({ params }) {
           </div>
         </header>
 
-        {/* Products grid */}
         <section className="sdp-products" aria-labelledby="sdp-products-title" style={{ padding: '40px' }}>
           <div className="sdp-products__inner" style={{ maxWidth: '1100px', margin: '0 auto' }}>
             <h2 className="sdp-products__title" id="sdp-products-title" style={{ color: '#ffffff', marginBottom: '24px' }}>
@@ -139,5 +136,14 @@ export default function SellerDetailPage({ params }) {
       </main>
       <Footer sponsors={sponsors} />
     </div>
+  );
+}
+
+export default function SellerDetailPage({ params }) {
+  const { id } = use(params);
+  return (
+    <ClientProviders>
+      <SellerDetailContent id={id} />
+    </ClientProviders>
   );
 }

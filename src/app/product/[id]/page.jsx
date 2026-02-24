@@ -1,5 +1,6 @@
 import { use } from 'react';
 import { sellers } from '../../../data/mockData';
+import ClientProviders from '../../../providers/ClientProviders';
 import ProductDetailClient from '../../../components/ProductDetail/ProductDetailClient';
 
 export default function ProductDetailPage({ params, searchParams }) {
@@ -28,5 +29,9 @@ export default function ProductDetailPage({ params, searchParams }) {
     );
   }
 
-  return <ProductDetailClient product={product} sellerId={resolvedSellerId} />;
+  return (
+    <ClientProviders>
+      <ProductDetailClient product={product} sellerId={resolvedSellerId} />
+    </ClientProviders>
+  );
 }

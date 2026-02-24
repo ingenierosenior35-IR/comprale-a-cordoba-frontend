@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import ClientProviders from '../providers/ClientProviders';
 import Navbar from '../components/Navbar/Navbar';
 import Hero from '../components/Hero/Hero';
 import HowItWorks from '../components/HowItWorks/HowItWorks';
@@ -20,15 +21,17 @@ export default function HomePage() {
   };
 
   return (
-    <div className="home-page">
-      <Navbar />
-      <main>
-        <Hero nextSectionRef={howItWorksSectionRef} />
-        <HowItWorks sectionRef={howItWorksSectionRef} />
-        <SellerSection onSellerClick={handleSellerClick} />
-        <Stats stats={stats} />
-        <Footer sponsors={sponsors} />
-      </main>
-    </div>
+    <ClientProviders>
+      <div className="home-page">
+        <Navbar />
+        <main>
+          <Hero nextSectionRef={howItWorksSectionRef} />
+          <HowItWorks sectionRef={howItWorksSectionRef} />
+          <SellerSection onSellerClick={handleSellerClick} />
+          <Stats stats={stats} />
+          <Footer sponsors={sponsors} />
+        </main>
+      </div>
+    </ClientProviders>
   );
 }

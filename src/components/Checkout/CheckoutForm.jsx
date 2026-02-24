@@ -3,14 +3,18 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../../context/CartContext';
-import graphqlClient from '../../lib/graphqlClient';
+import graphqlGuestClient from '../../lib/graphqlGuestClient';
 import {
   CREATE_GUEST_CART,
+  DROPSHIPPING_ADD_PRODUCTS_TO_CART,
   ADD_PRODUCTS_TO_CART,
   SET_GUEST_EMAIL,
   SET_SHIPPING_ADDRESS,
+  SET_BILLING_ADDRESS,
+  SET_SHIPPING_METHODS,
   SET_PAYMENT_METHOD,
   PLACE_ORDER,
+  REGISTRATE_PAYMENT,
 } from '../../graphql/checkout/mutations';
 import Navbar from '../Navbar/Navbar';
 import './Checkout.css';
@@ -23,6 +27,10 @@ const DEPARTMENTS = [
   'San Andrés', 'Santander', 'Sucre', 'Tolima', 'Valle del Cauca',
   'Vaupés', 'Vichada',
 ];
+
+const DEFAULT_CARRIER_CODE = 'envios';
+const DEFAULT_METHOD_CODE = 'inter';
+const DEFAULT_PAYMENT_CODE = 'payzen_standard';
 
 const formatPrice = (price) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(price);
@@ -72,18 +80,30 @@ export default function CheckoutForm() {
     setSubmitError('');
     try {
       // 1. Create guest cart
-      const cartData = await graphqlClient.request(CREATE_GUEST_CART);
+      const cartData = await graphqlGuestClient.request(CREATE_GUEST_CART);
       const cartId = cartData.createEmptyCart;
 
-      // 2. Add products to cart
-      const cartItems = items.map((i) => ({ sku: String(i.product.id), quantity: i.quantity }));
-      await graphqlClient.request(ADD_PRODUCTS_TO_CART, { cartId, cartItems });
+      // 2. Add products to cart (prefer dropshipping mutation; fall back to standard)
+      const dropshippingItems = items.map((i) => ({
+        sku: String(i.product.id),
+        quantity: i.quantity,
+        dropper_price: i.product.price,
+      }));
+      try {
+        await graphqlGuestClient.request(DROPSHIPPING_ADD_PRODUCTS_TO_CART, {
+          cartId,
+          cartItems: dropshippingItems,
+        });
+      } catch {
+        // Fall back to standard addProductsToCart if dropshipping mutation is unavailable
+        const standardItems = items.map((i) => ({ sku: String(i.product.id), quantity: i.quantity }));
+        await graphqlGuestClient.request(ADD_PRODUCTS_TO_CART, { cartId, cartItems: standardItems });
+      }
 
       // 3. Set guest email
-      await graphqlClient.request(SET_GUEST_EMAIL, { cartId, email: form.email });
+      await graphqlGuestClient.request(SET_GUEST_EMAIL, { cartId, email: form.email });
 
-      // 4. Set shipping address
-      await graphqlClient.request(SET_SHIPPING_ADDRESS, {
+      const addressArgs = {
         cartId,
         firstname: form.firstName,
         lastname: form.lastName,
@@ -92,18 +112,65 @@ export default function CheckoutForm() {
         region: form.department,
         postcode: '000000',
         telephone: form.phone,
+      };
+
+      // 4. Set shipping address
+      const shippingResult = await graphqlGuestClient.request(SET_SHIPPING_ADDRESS, addressArgs);
+
+      // 5. Set billing address (same as shipping when sameAddress is true)
+      await graphqlGuestClient.request(SET_BILLING_ADDRESS, addressArgs);
+
+      // 6. Set shipping method – use first available or fall back to default
+      const availableMethods =
+        shippingResult?.setShippingAddressesOnCart?.cart?.shipping_addresses?.[0]
+          ?.available_shipping_methods || [];
+      const selectedMethod =
+        availableMethods.find(
+          (m) => m.carrier_code === DEFAULT_CARRIER_CODE && m.method_code === DEFAULT_METHOD_CODE
+        ) ||
+        availableMethods[0] ||
+        { carrier_code: DEFAULT_CARRIER_CODE, method_code: DEFAULT_METHOD_CODE };
+
+      await graphqlGuestClient.request(SET_SHIPPING_METHODS, {
+        cartId,
+        carrierCode: selectedMethod.carrier_code,
+        methodCode: selectedMethod.method_code,
       });
 
-      // 5. Set payment method
-      await graphqlClient.request(SET_PAYMENT_METHOD, { cartId });
+      // 7. Set payment method (payzen_standard; fall back to first available or free)
+      try {
+        await graphqlGuestClient.request(SET_PAYMENT_METHOD, {
+          cartId,
+          code: DEFAULT_PAYMENT_CODE,
+        });
+      } catch {
+        await graphqlGuestClient.request(SET_PAYMENT_METHOD, { cartId, code: 'free' });
+      }
 
-      // 6. Place order
-      const orderData = await graphqlClient.request(PLACE_ORDER, { cartId });
+      // 8. Place order
+      const orderData = await graphqlGuestClient.request(PLACE_ORDER, { cartId });
       const orderNumber = orderData?.placeOrder?.order?.order_number || '';
 
-      // 7. Clear cart and redirect
+      // 9. Register payment to get redirect URL
+      let paymentUrl = null;
+      if (orderNumber) {
+        try {
+          const paymentData = await graphqlGuestClient.request(REGISTRATE_PAYMENT, {
+            orderId: String(orderNumber),
+          });
+          paymentUrl = paymentData?.registratePayment?.url_payment || null;
+        } catch {
+          // registratePayment may not be available; proceed to confirmation
+        }
+      }
+
+      // 10. Clear cart and redirect
       clearCart();
-      router.push(`/checkout/confirmation?order=${orderNumber}`);
+      if (paymentUrl) {
+        window.location.href = paymentUrl;
+      } else {
+        router.push(`/checkout/confirmation?order=${orderNumber}`);
+      }
     } catch (err) {
       console.error('Checkout error:', err);
       setSubmitError('Hubo un error al procesar tu pedido. Por favor intenta de nuevo.');

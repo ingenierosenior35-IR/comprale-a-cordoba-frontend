@@ -9,12 +9,13 @@ function SellerCard({ seller, onViewDetail }) {
   const [offset, setOffset] = useState(0);
   const router = useRouter();
   const visibleCount = 3;
+  const products = seller.products ?? [];
   const canPrev = offset > 0;
-  const canNext = offset + visibleCount < seller.products.length;
+  const canNext = offset + visibleCount < products.length;
 
   const handlePrev = () => setOffset((o) => Math.max(0, o - 1));
   const handleNext = () =>
-    setOffset((o) => Math.min(Math.max(0, seller.products.length - visibleCount), o + 1));
+    setOffset((o) => Math.min(Math.max(0, products.length - visibleCount), o + 1));
 
   const handleSellerNav = () => router.push(`/seller/${seller.id}`);
 
@@ -68,7 +69,7 @@ function SellerCard({ seller, onViewDetail }) {
 
         <div className="seller-card__right">
           <ProductScrollList
-            products={seller.products}
+            products={products}
             offset={offset}
             visibleCount={visibleCount}
             sellerId={seller.id}

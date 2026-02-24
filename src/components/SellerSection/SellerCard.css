@@ -93,8 +93,8 @@
 }
 
 .seller-card__btn {
-  background: var(--color-accent);
-  color: var(--color-white);
+  background: var(--color-primary);
+  color: var(--color-text-dark);
   padding: 8px 18px;
   border-radius: 50px;
   font-size: 0.85rem;
@@ -104,7 +104,7 @@
 }
 
 .seller-card__btn:hover {
-  background: var(--color-accent-dark);
+  background: var(--color-primary-hover);
   transform: translateY(-1px);
 }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import SellerCard from './SellerCard';
 import { useSellersWithProducts } from '../../hooks/useSellersWithProducts';
 import { sellers as mockSellers } from '../../data/mockData';
@@ -31,9 +32,16 @@ function adaptSeller(item) {
 function SellerSection({ onSellerClick }) {
   const { data, isError, isLoading } = useSellersWithProducts({ pageSize: 10, productLimit: 6, currentPage: 1 });
 
+  useEffect(() => {
+    if (isError) {
+      console.error('[SellerSection] GraphQL fetch failed – falling back to mock data');
+    }
+  }, [isError]);
+
+  const apiItems = !isError && !isLoading ? data?.sellersWithProducts?.items : null;
   const sellers =
-    !isError && !isLoading && data?.sellersWithProducts?.items?.length
-      ? data.sellersWithProducts.items.map(adaptSeller)
+    Array.isArray(apiItems) && apiItems.length > 0
+      ? apiItems.map(adaptSeller)
       : mockSellers;
 
   return (

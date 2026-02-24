@@ -51,8 +51,11 @@
   border-radius: var(--radius-sm);
   font-size: 1.1rem;
   font-weight: 700;
-  padding: 5px 0;
+  padding: 7px 0;
   width: calc(100% - 24px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color 0.2s;
 }
 

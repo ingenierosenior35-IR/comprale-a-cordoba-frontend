@@ -1,16 +1,25 @@
 'use client';
 
-import { QueryClientProvider } from '@tanstack/react-query';
-import { getQueryClient } from '../lib/queryClient';
+import { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CartProvider } from '../context/CartContext';
 
 export default function ClientProviders({ children }) {
-  const queryClient = getQueryClient();
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 1,
+            refetchOnWindowFocus: false,
+          },
+        },
+      })
+  );
+
   return (
     <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        {children}
-      </CartProvider>
+      <CartProvider>{children}</CartProvider>
     </QueryClientProvider>
   );
 }

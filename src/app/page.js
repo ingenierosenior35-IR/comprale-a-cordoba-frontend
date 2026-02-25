@@ -1,16 +1,16 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import ClientProviders from '../providers/ClientProviders';
 import Navbar from '../components/Navbar/Navbar';
 import Hero from '../components/Hero/Hero';
 import HowItWorks from '../components/HowItWorks/HowItWorks';
 import SellerSection from '../components/SellerSection/SellerSection';
 import Stats from '../components/Stats/Stats';
 import Footer from '../components/Footer/Footer';
-import { sellers as mockSellers, stats, sponsors } from '../data/mockData';
-import { SELLERS_WITH_PRODUCTS } from '../graphql/sellers/queries';
+import { stats } from '../data/mockData';
+import { useSellersWithProductsInfinite } from '../hooks/useSellersWithProductsInfinite';
+import { useInfiniteScrollTrigger } from '../hooks/useInfiniteScrollTrigger';
 import './home.css';
 
 const SELLER_PLACEHOLDER = 'https://via.placeholder.com/400x300?text=Negocio';
@@ -21,9 +21,10 @@ function stripHtml(html) {
 }
 
 function mapSellers(items) {
-  return items.map((item) => {
-    const s = item.seller;
-    const productItems = item.products?.items ?? [];
+  return (items || []).map((item) => {
+    const s = item?.seller || {};
+    const productItems = Array.isArray(item?.products?.items) ? item.products.items : [];
+
     return {
       id: s.seller_id,
       name: s.shop_title || s.shop_url || `Seller ${s.seller_id}`,
@@ -32,10 +33,10 @@ function mapSellers(items) {
       category: 'Negocio',
       rating: 4.8,
       products: productItems.map((p, i) => ({
-        id: p.sku || String(i),
-        name: p.name,
-        price: p.price_range?.minimum_price?.final_price?.value ?? 0,
-        image: p.image?.url || PRODUCT_PLACEHOLDER,
+        id: p?.sku || `${s.seller_id || 'seller'}-${i}`,
+        name: p?.name || '',
+        price: p?.price_range?.minimum_price?.final_price?.value ?? 0,
+        image: p?.image?.url || PRODUCT_PLACEHOLDER,
       })),
     };
   });
@@ -44,47 +45,42 @@ function mapSellers(items) {
 export default function HomePage() {
   const howItWorksSectionRef = useRef(null);
   const router = useRouter();
-  const [sellers, setSellers] = useState(mockSellers);
 
-  useEffect(() => {
-    async function fetchSellers() {
-      try {
-        const res = await fetch('/api/graphql-proxy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: SELLERS_WITH_PRODUCTS,
-            variables: { pageSize: 100, productLimit: 6, currentPage: 1 },
-          }),
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        const items = json?.data?.sellersWithProducts?.items;
-        if (!Array.isArray(items) || items.length === 0) throw new Error('No sellers returned');
-        setSellers(mapSellers(items));
-      } catch (err) {
-        console.warn('[HomePage] GraphQL fetch failed, using mock data:', err?.message || err);
-      }
-    }
-    fetchSellers();
-  }, []);
+  // ✅ infinite pagination for sellers
+  const q = useSellersWithProductsInfinite({ pageSize: 20, productLimit: 6 });
 
-  const handleSellerClick = (seller) => {
-    router.push(`/seller/${seller.id}`);
-  };
+  const sellers = useMemo(() => {
+    const pages = q.data?.pages || [];
+    const allItems = pages.flatMap((p) => p?.sellersWithProducts?.items || []);
+    return mapSellers(allItems);
+  }, [q.data]);
+
+  const canLoadMore = !!q.hasNextPage && !q.isFetchingNextPage;
+
+  const loadMore = useCallback(() => {
+    if (!canLoadMore) return;
+    q.fetchNextPage();
+  }, [canLoadMore, q]);
+
+  const sentinelRef = useInfiniteScrollTrigger({
+    enabled: canLoadMore,
+    onLoadMore: loadMore,
+    rootMargin: '900px',
+  });
 
   return (
-    <ClientProviders>
-      <div className="home-page">
-        <Navbar />
-        <main>
-          <Hero nextSectionRef={howItWorksSectionRef} />
-          <HowItWorks sectionRef={howItWorksSectionRef} />
-          <SellerSection sellers={sellers} onSellerClick={handleSellerClick} />
-          <Stats stats={stats} />
-          <Footer sponsors={sponsors} />
-        </main>
-      </div>
-    </ClientProviders>
+    <div className="home-page">
+      <Navbar />
+      <main>
+        <Hero nextSectionRef={howItWorksSectionRef} />
+        <HowItWorks sectionRef={howItWorksSectionRef} />
+
+        <SellerSection sellers={sellers} onSellerClick={(seller) => router.push(`/seller/${seller.id}`)} />
+
+        <div ref={sentinelRef} className="home-infinite__sentinel" />
+        <Stats stats={stats} />
+        <Footer sponsors={[]} />
+      </main>
+    </div>
   );
 }

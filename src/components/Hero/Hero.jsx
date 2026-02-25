@@ -3,13 +3,10 @@
 import { useEffect, useRef } from 'react';
 import './Hero.css';
 
-const SCROLL_THRESHOLD = 2;
-const VIDEO_URL =
-  'https://www.w3schools.com/howto/rain.mp4';
+const VIDEO_URL = 'https://www.w3schools.com/howto/rain.mp4';
 
 function Hero({ nextSectionRef }) {
   const heroRef = useRef(null);
-  const scrollCountRef = useRef(0);
   const hasScrolledRef = useRef(false);
 
   useEffect(() => {
@@ -25,10 +22,6 @@ function Hero({ nextSectionRef }) {
       if (!isHeroVisible) return;
 
       if (e.deltaY > 0) {
-        scrollCountRef.current += 1;
-      }
-
-      if (scrollCountRef.current >= SCROLL_THRESHOLD) {
         hasScrolledRef.current = true;
         nextSectionRef?.current?.scrollIntoView({ behavior: 'smooth' });
       }
@@ -40,36 +33,52 @@ function Hero({ nextSectionRef }) {
 
   return (
     <section className="hero" ref={heroRef} id="hero">
-      <video
-        className="hero__video"
-        autoPlay
-        loop
-        muted
-        playsInline
-        aria-hidden="true"
-      >
+      <video className="hero__video" autoPlay loop muted playsInline aria-hidden="true">
         <source src={VIDEO_URL} type="video/mp4" />
       </video>
 
       <div className="hero__overlay" />
 
       <div className="hero__content">
-        <h1 className="hero__title">
-          Cómprale a <span className="hero__title-accent">Córdoba</span>
+        <h1 className="hero__title" aria-label="compraleacordoba.com">
+          <span className="hero__title-regular">compralea</span>
+          <span className="hero__title-bold">cordoba.com</span>
         </h1>
-        <p className="hero__subtitle">
-          Apoya los negocios locales y recibe tus productos sin costo adicional
-        </p>
-        <button
-          className="hero__cta"
-          onClick={() => nextSectionRef?.current?.scrollIntoView({ behavior: 'smooth' })}
-        >
-          Descubrir negocios
-        </button>
-      </div>
 
-      <div className="hero__scroll-hint" aria-hidden="true">
-        <span />
+        <p className="hero__subtitle">
+          Un marketplace hecho para ayudarle a los
+          <br />
+          emprendedores de Córdoba a reempezar.
+        </p>
+
+        <div className="hero__arrows" aria-hidden="true">
+          <svg
+            className="hero__arrow"
+            width="30"
+            height="30"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+          <svg
+            className="hero__arrow hero__arrow--second"
+            width="30"
+            height="30"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
       </div>
     </section>
   );

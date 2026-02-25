@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../../context/CartContext';
+import { useAllCities } from '../../hooks/useAllCities';
+import { useShippingQuote } from '../../hooks/useShippingQuote';
 import graphqlGuestClient from '../../lib/graphqlGuestClient';
 import {
   CREATE_GUEST_CART,
-  DROPSHIPPING_ADD_PRODUCTS_TO_CART,
   ADD_PRODUCTS_TO_CART,
   SET_GUEST_EMAIL,
   SET_SHIPPING_ADDRESS,
@@ -19,161 +20,259 @@ import {
 import Navbar from '../Navbar/Navbar';
 import './Checkout.css';
 
-const DEPARTMENTS = [
-  'Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bolívar', 'Boyacá',
-  'Caldas', 'Caquetá', 'Casanare', 'Cauca', 'Cesar', 'Chocó', 'Córdoba',
-  'Cundinamarca', 'Guainía', 'Guaviare', 'Huila', 'La Guajira', 'Magdalena',
-  'Meta', 'Nariño', 'Norte de Santander', 'Putumayo', 'Quindío', 'Risaralda',
-  'San Andrés', 'Santander', 'Sucre', 'Tolima', 'Valle del Cauca',
-  'Vaupés', 'Vichada',
-];
-
 const DEFAULT_CARRIER_CODE = 'envios';
 const DEFAULT_METHOD_CODE = 'inter';
 const DEFAULT_PAYMENT_CODE = 'payzen_standard';
 
 const formatPrice = (price) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(price);
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(price || 0);
+
+const ID_TYPES = ['C.C', 'C.E', 'Pasaporte', 'NIT'];
+const PAYMENT_METHODS = ['Nequi', 'VISA', 'Mastercard', 'G Pay', 'Pay'];
+
+function stableCartSignature(items) {
+  return (items || [])
+    .map((i) => `${i?.product?.sku || i?.product?.id}:${i?.quantity || 0}`)
+    .sort()
+    .join('|');
+}
 
 export default function CheckoutForm() {
   const router = useRouter();
   const { items, total, updateQuantity, clearCart } = useCart();
+  const { data: citiesData } = useAllCities();
+
+  const cities = useMemo(() => citiesData?.allCities?.items || [], [citiesData]);
 
   const [form, setForm] = useState({
-    email: '', firstName: '', lastName: '',
-    cedula: 'Cédula de ciudadanía', cedNum: '',
-    phone: '', department: '', city: '', address: '',
-    sameAddress: true, acceptTerms: false, acceptData: false,
+    fullName: '',
+    email: '',
+    idType: 'C.C',
+    idNumber: '',
+    phone: '',
+    cityId: '',
+    cityName: '',
+    address: '',
+    department: '',
+    regionId: '',
+    acceptTerms: false,
+    acceptData: false,
   });
+
   const [errors, setErrors] = useState({});
   const [processing, setProcessing] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  // Cart used ONLY for shipping estimation (to avoid duplication issues)
+  const [estimateCartId, setEstimateCartId] = useState('');
+  const [cartSyncing, setCartSyncing] = useState(false);
+  const syncNonceRef = useRef(0);
+
+  // Build a signature so we can re-sync when items/qty change
+  const cartSignature = useMemo(() => stableCartSignature(items), [items]);
+
+  // Keep estimate cart rebuilt when items change (safe without update/remove mutations)
+  useEffect(() => {
+    let cancelled = false;
+
+    async function rebuildEstimateCart() {
+      if (!items?.length) {
+        setEstimateCartId('');
+        return;
+      }
+
+      // If user hasn't selected city/address yet, we still rebuild the cart so that
+      // once they select city/address the estimate can run instantly.
+      setCartSyncing(true);
+      const nonce = ++syncNonceRef.current;
+
+      try {
+        const cartData = await graphqlGuestClient.request(CREATE_GUEST_CART);
+        const newCartId = cartData?.createGuestCart?.cart?.id;
+        if (!newCartId) throw new Error('No se pudo crear el carrito para cotización.');
+
+        // Add items once to this fresh cart
+        const cartItems = items.map((i) => ({
+          parent_sku: i.product.parent_sku || null,
+          sku: i.product.sku || i.product.id,
+          quantity: i.quantity,
+        }));
+
+        const addRes = await graphqlGuestClient.request(ADD_PRODUCTS_TO_CART, {
+          cartId: newCartId,
+          cartItems,
+        });
+
+        const userErrors = addRes?.addProductsToCart?.user_errors || [];
+        if (userErrors.length) throw new Error(userErrors[0]?.message || 'Error agregando productos al carrito (cotización).');
+
+        // Only apply if latest run
+        if (!cancelled && nonce === syncNonceRef.current) {
+          setEstimateCartId(newCartId);
+        }
+      } catch (e) {
+        console.error('Estimate cart rebuild error:', e);
+        if (!cancelled) setEstimateCartId('');
+      } finally {
+        if (!cancelled && nonce === syncNonceRef.current) setCartSyncing(false);
+      }
+    }
+
+    rebuildEstimateCart();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cartSignature, items]);
+
+  // Estimator: runs when estimateCartId + city + address are present
+  const { data: estimateData, isFetching: shippingLoading } = useShippingQuote({
+    cartId: estimateCartId,
+    city: form.cityName,
+    street: form.address ? [form.address] : [],
+  });
+
+  // RESPONSE IS ARRAY: estimateShippingMethods: [{ amount { value } }]
+  const shippingCost = estimateData?.estimateShippingMethods?.[0]?.amount?.value ?? null;
+  const grandTotal = total + (shippingCost || 0);
+
+  const clearFieldError = (name) => {
+    if (!errors[name]) return;
+    setErrors((prev) => {
+      const n = { ...prev };
+      delete n[name];
+      return n;
+    });
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    if (name === 'cityId') {
+      const city = cities.find((c) => String(c.id) === String(value)) || null;
+
+      setForm((f) => ({
+        ...f,
+        cityId: value,
+        cityName: city?.name || '',
+        department: city?.region?.name || '',
+        regionId: city?.region?.id ? String(city.region.id) : '',
+      }));
+
+      clearFieldError('cityId');
+      return;
+    }
+
     setForm((f) => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
-    if (errors[name]) setErrors((e) => { const n = { ...e }; delete n[name]; return n; });
+    clearFieldError(name);
   };
 
   const validate = () => {
-    const newErrors = {};
-    if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) newErrors.email = 'Email inválido';
-    if (!form.firstName.trim()) newErrors.firstName = 'Requerido';
-    if (!form.lastName.trim()) newErrors.lastName = 'Requerido';
-    if (!form.cedNum.trim()) newErrors.cedNum = 'Requerido';
-    if (!form.phone.trim()) newErrors.phone = 'Requerido';
-    if (!form.department) newErrors.department = 'Requerido';
-    if (!form.city.trim()) newErrors.city = 'Requerido';
-    if (!form.address.trim()) newErrors.address = 'Requerido';
-    if (!form.acceptTerms) newErrors.acceptTerms = 'Debes aceptar los términos';
-    return newErrors;
+    const errs = {};
+    if (!form.fullName.trim()) errs.fullName = 'Requerido';
+    if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Email inválido';
+    if (!form.idNumber.trim()) errs.idNumber = 'Requerido';
+    if (!form.phone.trim()) errs.phone = 'Requerido';
+    if (!form.cityId) errs.cityId = 'Selecciona una ciudad';
+    if (!form.address.trim()) errs.address = 'Requerido';
+    if (!form.regionId || !Number.isFinite(Number(form.regionId))) errs.cityId = 'Selecciona una ciudad válida';
+    if (!form.acceptTerms) errs.acceptTerms = 'Debes aceptar los términos';
+    if (!form.acceptData) errs.acceptData = 'Debes autorizar el tratamiento de datos';
+    return errs;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
+
     setProcessing(true);
     setSubmitError('');
+
+    const nameParts = form.fullName.trim().split(/\s+/);
+    const firstname = nameParts[0] || form.fullName.trim();
+    const lastname = nameParts.slice(1).join(' ') || '';
+
     try {
-      // 1. Create guest cart
+      // Checkout cart (separate from estimate cart)
       const cartData = await graphqlGuestClient.request(CREATE_GUEST_CART);
-      const cartId = cartData.createEmptyCart;
+      const checkoutCartId = cartData?.createGuestCart?.cart?.id;
+      if (!checkoutCartId) throw new Error('No se pudo crear el carrito invitado.');
 
-      // 2. Add products to cart (prefer dropshipping mutation; fall back to standard)
-      const dropshippingItems = items.map((i) => ({
-        sku: String(i.product.id),
+      const cartItems = items.map((i) => ({
+        parent_sku: i.product.parent_sku || null,
+        sku: i.product.sku || i.product.id,
         quantity: i.quantity,
-        dropper_price: i.product.price,
       }));
-      try {
-        await graphqlGuestClient.request(DROPSHIPPING_ADD_PRODUCTS_TO_CART, {
-          cartId,
-          cartItems: dropshippingItems,
-        });
-      } catch {
-        // Fall back to standard addProductsToCart if dropshipping mutation is unavailable
-        const standardItems = items.map((i) => ({ sku: String(i.product.id), quantity: i.quantity }));
-        await graphqlGuestClient.request(ADD_PRODUCTS_TO_CART, { cartId, cartItems: standardItems });
-      }
 
-      // 3. Set guest email
-      await graphqlGuestClient.request(SET_GUEST_EMAIL, { cartId, email: form.email });
+      const addRes = await graphqlGuestClient.request(ADD_PRODUCTS_TO_CART, { cartId: checkoutCartId, cartItems });
+      const userErrors = addRes?.addProductsToCart?.user_errors || [];
+      if (userErrors.length) throw new Error(userErrors[0]?.message || 'Error agregando productos al carrito.');
 
-      const addressArgs = {
-        cartId,
-        firstname: form.firstName,
-        lastname: form.lastName,
+      await graphqlGuestClient.request(SET_GUEST_EMAIL, { cartId: checkoutCartId, email: form.email });
+
+      const regionIdInt = Number(form.regionId);
+
+      const shippingResult = await graphqlGuestClient.request(SET_SHIPPING_ADDRESS, {
+        cartId: checkoutCartId,
+        firstname,
+        lastname,
         street: form.address,
-        city: form.city,
-        region: form.department,
-        postcode: '000000',
+        city: form.cityName,
+        regionId: regionIdInt,
         telephone: form.phone,
-      };
+      });
 
-      // 4. Set shipping address
-      const shippingResult = await graphqlGuestClient.request(SET_SHIPPING_ADDRESS, addressArgs);
+      await graphqlGuestClient.request(SET_BILLING_ADDRESS, {
+        cartId: checkoutCartId,
+        firstname,
+        lastname,
+        street: form.address,
+        city: form.cityName,
+        regionId: regionIdInt,
+        telephone: form.phone,
+      });
 
-      // 5. Set billing address (same as shipping when sameAddress is true)
-      await graphqlGuestClient.request(SET_BILLING_ADDRESS, addressArgs);
-
-      // 6. Set shipping method – use first available or fall back to default
       const availableMethods =
-        shippingResult?.setShippingAddressesOnCart?.cart?.shipping_addresses?.[0]
-          ?.available_shipping_methods || [];
+        shippingResult?.setShippingAddressesOnCart?.cart?.shipping_addresses?.[0]?.available_shipping_methods || [];
+
       const selectedMethod =
-        availableMethods.find(
-          (m) => m.carrier_code === DEFAULT_CARRIER_CODE && m.method_code === DEFAULT_METHOD_CODE
-        ) ||
+        availableMethods.find((m) => m.carrier_code === DEFAULT_CARRIER_CODE && m.method_code === DEFAULT_METHOD_CODE) ||
         availableMethods[0] ||
         { carrier_code: DEFAULT_CARRIER_CODE, method_code: DEFAULT_METHOD_CODE };
 
       await graphqlGuestClient.request(SET_SHIPPING_METHODS, {
-        cartId,
+        cartId: checkoutCartId,
         carrierCode: selectedMethod.carrier_code,
         methodCode: selectedMethod.method_code,
       });
 
-      // 7. Set payment method (payzen_standard; fall back to first available or free)
-      try {
-        await graphqlGuestClient.request(SET_PAYMENT_METHOD, {
-          cartId,
-          code: DEFAULT_PAYMENT_CODE,
-        });
-      } catch {
-        await graphqlGuestClient.request(SET_PAYMENT_METHOD, { cartId, code: 'free' });
-      }
+      await graphqlGuestClient.request(SET_PAYMENT_METHOD, { cartId: checkoutCartId, code: DEFAULT_PAYMENT_CODE });
 
-      // 8. Place order
-      const orderData = await graphqlGuestClient.request(PLACE_ORDER, { cartId });
-      const orderNumber = orderData?.placeOrder?.order?.order_number || '';
+      const orderData = await graphqlGuestClient.request(PLACE_ORDER, { cartId: checkoutCartId });
+      const placeErrors = orderData?.placeOrder?.errors || [];
+      if (placeErrors.length) throw new Error(placeErrors[0]?.message || 'Error al crear la orden.');
 
-      // 9. Register payment to get redirect URL
-      let paymentUrl = null;
-      if (orderNumber) {
-        try {
-          const paymentData = await graphqlGuestClient.request(REGISTRATE_PAYMENT, {
-            orderId: String(orderNumber),
-          });
-          paymentUrl = paymentData?.registratePayment?.url_payment || null;
-        } catch {
-          // registratePayment may not be available; proceed to confirmation
-        }
-      }
+      const orderId = orderData?.placeOrder?.orderV2?.id;
+      const orderNumber = orderData?.placeOrder?.orderV2?.number;
 
-      // 10. Clear cart and redirect
+      if (!orderId) throw new Error('No se recibió el ID de la orden.');
+      if (!orderNumber) throw new Error('No se recibió el número de la orden.');
+
+      const paymentData = await graphqlGuestClient.request(REGISTRATE_PAYMENT, { orderId: String(orderId) });
+      const paymentUrl = paymentData?.registratePayment?.payment?.url_payment || null;
+
       clearCart();
-      if (paymentUrl) {
-        window.location.href = paymentUrl;
-      } else {
-        router.push(`/checkout/confirmation?order=${orderNumber}`);
-      }
+
+      if (paymentUrl) window.location.href = paymentUrl;
+      else router.push(`/checkout/confirmation?order=${orderNumber}`);
     } catch (err) {
       console.error('Checkout error:', err);
-      setSubmitError('Hubo un error al procesar tu pedido. Por favor intenta de nuevo.');
+      setSubmitError(err?.message || 'Hubo un error al procesar tu pedido. Por favor intenta de nuevo.');
       setProcessing(false);
     }
   };
@@ -184,7 +283,9 @@ export default function CheckoutForm() {
         <Navbar />
         <main className="checkout__empty">
           <p>Tu carrito está vacío.</p>
-          <button className="checkout__back-btn" onClick={() => router.push('/')}>Volver al inicio</button>
+          <button className="checkout__back-btn" onClick={() => router.push('/')}>
+            Volver al inicio
+          </button>
         </main>
       </div>
     );
@@ -194,181 +295,239 @@ export default function CheckoutForm() {
     <div className="checkout">
       <Navbar />
       <main className="checkout__main">
-        <h1 className="checkout__title">Finalizar compra</h1>
         {submitError && (
-          <div style={{ background: 'rgba(232,54,61,0.15)', border: '1px solid #e8363d', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', color: '#e8363d' }}>
+          <div className="checkout__submit-error" role="alert">
             {submitError}
           </div>
         )}
-        <form className="checkout__grid" onSubmit={handleSubmit} noValidate>
 
-          {/* Column 1: Address */}
-          <section className="checkout__col checkout__col--address" aria-labelledby="address-title">
-            <h2 className="checkout__col-title" id="address-title">Mis direcciones</h2>
+        <form className="checkout__grid" onSubmit={handleSubmit} noValidate>
+          {/* Left */}
+          <section className="checkout__col checkout__col--form" aria-labelledby="form-title">
+            <h2 className="checkout__col-title" id="form-title">
+              Datos de envío
+            </h2>
 
             <div className="checkout__field checkout__field--full">
-              <label className="checkout__label" htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" className={`checkout__input${errors.email ? ' checkout__input--error' : ''}`}
-                value={form.email} onChange={handleChange} placeholder="correo@ejemplo.com" />
+              <input
+                name="fullName"
+                type="text"
+                className={`checkout__input${errors.fullName ? ' checkout__input--error' : ''}`}
+                value={form.fullName}
+                onChange={handleChange}
+                placeholder="Nombre completo*"
+                aria-label="Nombre completo"
+                autoComplete="name"
+              />
+              {errors.fullName && <span className="checkout__error">{errors.fullName}</span>}
+            </div>
+
+            <div className="checkout__field checkout__field--full">
+              <input
+                name="email"
+                type="email"
+                className={`checkout__input${errors.email ? ' checkout__input--error' : ''}`}
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Correo"
+                aria-label="Correo"
+                autoComplete="email"
+              />
               {errors.email && <span className="checkout__error">{errors.email}</span>}
             </div>
 
             <div className="checkout__row">
               <div className="checkout__field">
-                <label className="checkout__label" htmlFor="firstName">Nombre</label>
-                <input id="firstName" name="firstName" type="text" className={`checkout__input${errors.firstName ? ' checkout__input--error' : ''}`}
-                  value={form.firstName} onChange={handleChange} placeholder="Nombre" />
-                {errors.firstName && <span className="checkout__error">{errors.firstName}</span>}
-              </div>
-              <div className="checkout__field">
-                <label className="checkout__label" htmlFor="lastName">Apellido</label>
-                <input id="lastName" name="lastName" type="text" className={`checkout__input${errors.lastName ? ' checkout__input--error' : ''}`}
-                  value={form.lastName} onChange={handleChange} placeholder="Apellido" />
-                {errors.lastName && <span className="checkout__error">{errors.lastName}</span>}
-              </div>
-            </div>
-
-            <div className="checkout__row">
-              <div className="checkout__field">
-                <label className="checkout__label" htmlFor="cedula">Tipo de identificación</label>
-                <select id="cedula" name="cedula" className="checkout__input checkout__select"
-                  value={form.cedula} onChange={handleChange}>
-                  <option>Cédula de ciudadanía</option>
-                  <option>Cédula de extranjería</option>
-                  <option>Pasaporte</option>
-                  <option>NIT</option>
+                <select
+                  name="idType"
+                  className="checkout__input checkout__select"
+                  value={form.idType}
+                  onChange={handleChange}
+                  aria-label="Tipo de identificación"
+                >
+                  {ID_TYPES.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
                 </select>
               </div>
+
               <div className="checkout__field">
-                <label className="checkout__label" htmlFor="cedNum">Número de identificación</label>
-                <input id="cedNum" name="cedNum" type="text" className={`checkout__input${errors.cedNum ? ' checkout__input--error' : ''}`}
-                  value={form.cedNum} onChange={handleChange} placeholder="Número" />
-                {errors.cedNum && <span className="checkout__error">{errors.cedNum}</span>}
+                <input
+                  name="idNumber"
+                  type="text"
+                  className={`checkout__input${errors.idNumber ? ' checkout__input--error' : ''}`}
+                  value={form.idNumber}
+                  onChange={handleChange}
+                  placeholder="Número de identificación"
+                  aria-label="Número de identificación"
+                />
+                {errors.idNumber && <span className="checkout__error">{errors.idNumber}</span>}
               </div>
             </div>
 
-            <div className="checkout__row">
-              <div className="checkout__field">
-                <label className="checkout__label" htmlFor="phone">Teléfono</label>
-                <input id="phone" name="phone" type="tel" className={`checkout__input${errors.phone ? ' checkout__input--error' : ''}`}
-                  value={form.phone} onChange={handleChange} placeholder="3001234567" />
-                {errors.phone && <span className="checkout__error">{errors.phone}</span>}
-              </div>
-              <div className="checkout__field">
-                <label className="checkout__label" htmlFor="department">Departamento</label>
-                <select id="department" name="department" className={`checkout__input checkout__select${errors.department ? ' checkout__input--error' : ''}`}
-                  value={form.department} onChange={handleChange}>
-                  <option value="">Seleccionar</option>
-                  {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
-                </select>
-                {errors.department && <span className="checkout__error">{errors.department}</span>}
-              </div>
+            <div className="checkout__field checkout__field--full">
+              <input
+                name="phone"
+                type="tel"
+                className={`checkout__input${errors.phone ? ' checkout__input--error' : ''}`}
+                value={form.phone}
+                onChange={handleChange}
+                placeholder="Teléfono"
+                aria-label="Teléfono"
+                autoComplete="tel"
+              />
+              {errors.phone && <span className="checkout__error">{errors.phone}</span>}
             </div>
 
-            <div className="checkout__row">
-              <div className="checkout__field">
-                <label className="checkout__label" htmlFor="city">Ciudad</label>
-                <input id="city" name="city" type="text" className={`checkout__input${errors.city ? ' checkout__input--error' : ''}`}
-                  value={form.city} onChange={handleChange} placeholder="Ciudad" />
-                {errors.city && <span className="checkout__error">{errors.city}</span>}
-              </div>
-              <div className="checkout__field">
-                <label className="checkout__label" htmlFor="address">Dirección</label>
-                <input id="address" name="address" type="text" className={`checkout__input${errors.address ? ' checkout__input--error' : ''}`}
-                  value={form.address} onChange={handleChange} placeholder="Calle, Carrera, etc." />
-                {errors.address && <span className="checkout__error">{errors.address}</span>}
-              </div>
+            <div className="checkout__field checkout__field--full">
+              <select
+                name="cityId"
+                className={`checkout__input checkout__select${errors.cityId ? ' checkout__input--error' : ''}`}
+                value={form.cityId}
+                onChange={handleChange}
+                aria-label="Ciudad"
+              >
+                <option value="">Ciudad</option>
+                {cities.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              {errors.cityId && <span className="checkout__error">{errors.cityId}</span>}
+            </div>
+
+            <div className="checkout__field checkout__field--full">
+              <input
+                name="address"
+                type="text"
+                className={`checkout__input${errors.address ? ' checkout__input--error' : ''}`}
+                value={form.address}
+                onChange={handleChange}
+                placeholder="Dirección"
+                aria-label="Dirección"
+                autoComplete="street-address"
+              />
+              {errors.address && <span className="checkout__error">{errors.address}</span>}
+            </div>
+
+            <div className="checkout__field checkout__field--full">
+              <input
+                name="department"
+                type="text"
+                className="checkout__input checkout__input--readonly"
+                value={form.department}
+                readOnly
+                placeholder="Departamento"
+                aria-label="Departamento"
+              />
             </div>
 
             <label className={`checkout__checkbox${errors.acceptTerms ? ' checkout__checkbox--error' : ''}`}>
               <input type="checkbox" name="acceptTerms" checked={form.acceptTerms} onChange={handleChange} />
-              <span>Acepto los <a href="#" className="checkout__link">Términos y Condiciones</a></span>
+              <span>
+                Aceptar{' '}
+                <a href="#" className="checkout__link">
+                  Términos y Condiciones
+                </a>
+              </span>
             </label>
             {errors.acceptTerms && <span className="checkout__error">{errors.acceptTerms}</span>}
 
-            <label className="checkout__checkbox">
+            <label className={`checkout__checkbox${errors.acceptData ? ' checkout__checkbox--error' : ''}`}>
               <input type="checkbox" name="acceptData" checked={form.acceptData} onChange={handleChange} />
-              <span>Autorizo el tratamiento de mis datos personales de acuerdo con la política de privacidad</span>
+              <span>Autorizo el tratamiento de mis datos personales</span>
             </label>
+            {errors.acceptData && <span className="checkout__error">{errors.acceptData}</span>}
+
+            <hr className="checkout__form-divider" />
+            <p className="checkout__payment-label">Pago en línea</p>
+            <div className="checkout__payment-logos" aria-label="Métodos de pago aceptados">
+              {PAYMENT_METHODS.map((m) => (
+                <span key={m} className="checkout__payment-logo">
+                  {m}
+                </span>
+              ))}
+            </div>
           </section>
 
-          {/* Column 2: Shipping & Payment */}
-          <section className="checkout__col checkout__col--payment" aria-labelledby="payment-title">
-            <h2 className="checkout__col-title" id="payment-title">Método de envío y pago</h2>
-
-            <div className="checkout__section-label">Método de envío</div>
-            <div className="checkout__shipping-card">
-              <div className="checkout__shipping-radio">
-                <span className="checkout__radio-dot" aria-hidden="true" />
-              </div>
-              <div className="checkout__shipping-info">
-                <span className="checkout__shipping-name">Interrapidísimo</span>
-                <span className="checkout__shipping-price">Gratis $0</span>
-              </div>
-            </div>
-
-            <div className="checkout__section-label" style={{ marginTop: '24px' }}>Métodos de pago</div>
-            <div className="checkout__payment-card">
-              <p className="checkout__payment-text">Pago en línea</p>
-              <div className="checkout__payment-logos" aria-label="Métodos de pago aceptados">
-                {['PSE', 'Nequi', 'VISA', 'Mastercard', 'Google Pay'].map((m) => (
-                  <span key={m} className="checkout__payment-logo">{m}</span>
-                ))}
-              </div>
-            </div>
-
-            <label className="checkout__toggle-row">
-              <input type="checkbox" name="sameAddress" checked={form.sameAddress} onChange={handleChange} />
-              <span>La dirección de envío y facturación son la misma</span>
-            </label>
-          </section>
-
-          {/* Column 3: Order summary */}
+          {/* Right */}
           <section className="checkout__col checkout__col--summary" aria-labelledby="summary-title">
-            <h2 className="checkout__col-title" id="summary-title">Sus artículos y envío</h2>
+            <h2 className="checkout__summary-title" id="summary-title">
+              Resumen de compra
+            </h2>
 
             <ul className="checkout__items" aria-label="Artículos en el carrito">
               {items.map(({ product, quantity: qty }) => (
                 <li key={product.id} className="checkout__item">
                   <img className="checkout__item-img" src={product.image} alt={product.name} />
+
                   <div className="checkout__item-info">
                     <p className="checkout__item-name">{product.name}</p>
-                    <p className="checkout__item-shipping">Envío por Inter Rapidísimo</p>
                     <div className="checkout__item-qty" role="group" aria-label={`Cantidad de ${product.name}`}>
-                      <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty - 1)} aria-label="Reducir">−</button>
+                      <button
+                        type="button"
+                        className="checkout__qty-btn"
+                        onClick={() => updateQuantity(product.id, qty - 1)}
+                        aria-label="Reducir"
+                      >
+                        −
+                      </button>
                       <span aria-live="polite">{qty}</span>
-                      <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty + 1)} aria-label="Aumentar">+</button>
+                      <button
+                        type="button"
+                        className="checkout__qty-btn"
+                        onClick={() => updateQuantity(product.id, qty + 1)}
+                        aria-label="Aumentar"
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
+
                   <p className="checkout__item-price">{formatPrice(product.price * qty)}</p>
                 </li>
               ))}
             </ul>
 
+            <a href="/" className="checkout__add-more">
+              + Agregar más productos
+            </a>
+
             <hr className="checkout__divider" />
 
+            <div className="checkout__summary-spacer" />
+
             <div className="checkout__summary">
+              <div className="checkout__summary-row">
+                <span>Costo de envío</span>
+                <span>
+                  {cartSyncing || shippingLoading
+                    ? '...'
+                    : shippingCost !== null
+                      ? formatPrice(shippingCost)
+                      : '$0'}
+                </span>
+              </div>
+
               <div className="checkout__summary-row">
                 <span>Subtotal</span>
                 <span>{formatPrice(total)}</span>
               </div>
-              <div className="checkout__summary-row">
-                <span>Costo de envío</span>
-                <span>$0</span>
-              </div>
-              <hr className="checkout__divider" />
-              <div className="checkout__summary-row checkout__summary-row--total">
-                <span>Total</span>
-                <span>{formatPrice(total)}</span>
-              </div>
+            </div>
+
+            <hr className="checkout__divider" />
+
+            <div className="checkout__summary-row checkout__summary-row--total">
+              <span>Total</span>
+              <span>{formatPrice(grandTotal)}</span>
             </div>
 
             <button type="submit" className="checkout__pay-btn" disabled={processing} aria-busy={processing}>
               {processing ? 'Procesando…' : 'Pagar'}
             </button>
-            <p className="checkout__legal">
-              Al realizar tu pago aceptas nuestros términos y condiciones. Tu información está protegida con cifrado SSL.
-            </p>
           </section>
         </form>
       </main>

@@ -1,60 +1,147 @@
 .footer {
-  background-color: var(--color-white);
-  padding: 48px 32px 32px;
-  border-top: 1px solid var(--color-border);
+  background: #1d1d1f;
 }
 
-.footer__inner {
+/* Full-width horizontal rules */
+.footer__rule {
+  height: 1px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.footer__rule--bottom {
+  margin-top: 12px;
+}
+
+/* Centered container for organizer + copyright */
+.footer__container {
   max-width: 1100px;
   margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── Organizer row ── */
+.footer__organizer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 0;
   text-align: center;
 }
 
-.footer__tagline {
+.footer__organizer-label {
   font-size: 0.9rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--color-text-light);
-  margin-bottom: 24px;
+  color: rgba(239, 239, 239, 0.9);
+  white-space: nowrap;
 }
 
-.footer__logos {
+.footer__organizer-logo {
+  height: 34px;
+  width: auto;
+  display: block;
+}
+
+/* ── Logos row ── */
+.footer__row {
+  width: 100%;
+  padding: 14px 0;
+}
+
+/* slightly wide but centered like design */
+.footer__row--bleed {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/*
+  ✅ Change from grid -> flex to center "Apoya:" WITH the logos,
+  so it sits immediately to the left of the first logo (Gobernación).
+*/
+.footer__row-inner {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 40px;
+  justify-content: center;
+  gap: 14px;
+}
+
+.footer__row-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(239, 239, 239, 0.9);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.footer__row-label--inline {
+  margin-left: 4px;
+}
+
+/* Logos container (centered as a group) */
+.footer__row-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 32px;
+  overflow: visible;
+  padding-bottom: 0;
 }
 
-.footer__logo-item {
+.footer__logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: grayscale(30%);
-  opacity: 0.85;
-  transition: filter 0.2s, opacity 0.2s;
+  opacity: 0.98;
 }
 
-.footer__logo-item:hover {
-  filter: grayscale(0%);
-  opacity: 1;
-}
-
+/* smaller logos so everything fits */
 .footer__logo-img {
-  max-height: 56px;
-  max-width: 160px;
+  height: 28px;
+  width: auto;
+  max-width: 150px;
   object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.95;
 }
 
-.footer__divider {
-  height: 1px;
-  background: var(--color-border);
-  margin-bottom: 20px;
-}
-
+/* Copyright */
 .footer__copyright {
-  font-size: 0.82rem;
-  color: var(--color-text-light);
+  margin: 10px 0 14px;
+  font-size: 0.8rem;
+  color: rgba(239, 239, 239, 0.55);
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer__container {
+    padding: 0 16px;
+  }
+
+  .footer__row--bleed {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* Stack label and logos on mobile */
+  .footer__row-inner {
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .footer__organizer-logo {
+    height: 30px;
+  }
+
+  .footer__logo-img {
+    height: 24px;
+    max-width: 130px;
+  }
+
+  .footer__row-label--inline {
+    margin-left: 0;
+  }
 }

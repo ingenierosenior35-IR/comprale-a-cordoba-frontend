@@ -40,20 +40,21 @@
   font-family: var(--font-sans);
   font-weight: 100;
 
-  /* ✅ smaller */
   font-size: clamp(38px, 5.0vw, 78px);
-
   line-height: 1.05;
   color: #f9f9f9;
   margin: 0;
   letter-spacing: -0.02em;
+
   position: absolute;
   left: 50%;
-
   top: 44%;
-
   transform: translate(-50%, -52%);
+
   width: min(1300px, 94vw);
+
+  /* desktop/tablet: keep in one line */
+  white-space: nowrap;
 }
 
 .hero__title-regular {
@@ -82,7 +83,6 @@
   top: 53%;
   transform: translateX(-50%);
 
-  /* ✅ lower */
   margin-top: 215px;
 }
 
@@ -141,6 +141,39 @@
 }
 
 @media (max-width: 480px) {
+  /* ✅ true side margins + allow wrap */
+  .hero__content {
+    padding: 0 18px;
+  }
+
+  .hero__title {
+    /* make it comfortably fit */
+    font-size: clamp(26px, 8.0vw, 44px);
+    width: calc(100vw - 36px);
+
+    /* ✅ allow breaking into 2 lines */
+    white-space: normal;
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    /* ✅ small gap between chunks */
+    column-gap: 0px;
+    row-gap: 2px;
+
+    /* ✅ better line height for 2 rows */
+    line-height: 1.06;
+
+    /* ensures no clipping on iOS rounding */
+    padding: 0 2px;
+  }
+
+  /* ✅ force second part to go to next line if needed */
+  .hero__title-bold {
+    flex-basis: 100%;
+  }
+
   .hero__subtitle {
     margin-top: 150px;
     line-height: 24px;

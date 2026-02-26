@@ -6,11 +6,7 @@ import { useCart } from '../../context/CartContext';
 import { useAllCities } from '../../hooks/useAllCities';
 import { useShippingQuote } from '../../hooks/useShippingQuote';
 import graphqlGuestClient from '../../lib/graphqlGuestClient';
-import {
-  CREATE_GUEST_CART,
-  ADD_PRODUCTS_TO_CART,
-  CREATE_CHECKOUT_PAYMENT,
-} from '../../graphql/checkout/mutations';
+import { CREATE_GUEST_CART, ADD_PRODUCTS_TO_CART, CREATE_CHECKOUT_PAYMENT } from '../../graphql/checkout/mutations';
 import Navbar from '../Navbar/Navbar';
 import './Checkout.css';
 
@@ -36,10 +32,10 @@ export default function CheckoutForm() {
   const { items, total, updateQuantity, clearCart } = useCart();
   const { data: citiesData } = useAllCities();
 
-    const cities = useMemo(() => {
-      const list = citiesData?.allCities?.items || [];
-      return [...list].sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || ''), 'es'));
-    }, [citiesData]);
+  const cities = useMemo(() => {
+    const list = citiesData?.allCities?.items || [];
+    return [...list].sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || ''), 'es'));
+  }, [citiesData]);
 
   const [form, setForm] = useState({
     fullName: '',
@@ -60,15 +56,29 @@ export default function CheckoutForm() {
   const [processing, setProcessing] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  // ✅ derived: block pay button if invalid
+  const canSubmit = useMemo(() => {
+    if (processing) return false;
+    if (!items?.length) return false;
+    if (!form.fullName.trim()) return false;
+    if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) return false;
+    if (!form.idNumber.trim()) return false;
+    if (!form.phone.trim()) return false;
+    if (!form.cityId) return false;
+    if (!form.address.trim()) return false;
+    if (!form.regionId || !Number.isFinite(Number(form.regionId))) return false;
+    if (!form.acceptTerms) return false;
+    if (!form.acceptData) return false;
+    return true;
+  }, [processing, items, form]);
+
   // Cart used ONLY for shipping estimation (to avoid duplication issues)
   const [estimateCartId, setEstimateCartId] = useState('');
   const [cartSyncing, setCartSyncing] = useState(false);
   const syncNonceRef = useRef(0);
 
-  // Build a signature so we can re-sync when items/qty change
   const cartSignature = useMemo(() => stableCartSignature(items), [items]);
 
-  // Keep estimate cart rebuilt when items change (safe without update/remove mutations)
   useEffect(() => {
     let cancelled = false;
 
@@ -78,8 +88,6 @@ export default function CheckoutForm() {
         return;
       }
 
-      // If user hasn't selected city/address yet, we still rebuild the cart so that
-      // once they select city/address the estimate can run instantly.
       setCartSyncing(true);
       const nonce = ++syncNonceRef.current;
 
@@ -88,7 +96,6 @@ export default function CheckoutForm() {
         const newCartId = cartData?.createGuestCart?.cart?.id;
         if (!newCartId) throw new Error('No se pudo crear el carrito para cotización.');
 
-        // Add items once to this fresh cart
         const cartItems = items.map((i) => ({
           parent_sku: i.product.parent_sku || null,
           sku: i.product.sku || i.product.id,
@@ -103,7 +110,6 @@ export default function CheckoutForm() {
         const userErrors = addRes?.addProductsToCart?.user_errors || [];
         if (userErrors.length) throw new Error(userErrors[0]?.message || 'Error agregando productos al carrito (cotización).');
 
-        // Only apply if latest run
         if (!cancelled && nonce === syncNonceRef.current) {
           setEstimateCartId(newCartId);
         }
@@ -122,14 +128,12 @@ export default function CheckoutForm() {
     };
   }, [cartSignature, items]);
 
-  // Estimator: runs when estimateCartId + city + address are present
   const { data: estimateData, isFetching: shippingLoading } = useShippingQuote({
     cartId: estimateCartId,
     city: form.cityName,
     street: form.address ? [form.address] : [],
   });
 
-  // RESPONSE IS ARRAY: estimateShippingMethods: [{ amount { value } }]
   const shippingCost = estimateData?.estimateShippingMethods?.[0]?.amount?.value ?? null;
   const grandTotal = total + (shippingCost || 0);
 
@@ -195,7 +199,6 @@ export default function CheckoutForm() {
     const lastname = nameParts.slice(1).join(' ') || '';
 
     try {
-      // Checkout cart (separate from estimate cart)
       const cartData = await graphqlGuestClient.request(CREATE_GUEST_CART);
       const checkoutCartId = cartData?.createGuestCart?.cart?.id;
       if (!checkoutCartId) throw new Error('No se pudo crear el carrito invitado.');
@@ -210,8 +213,7 @@ export default function CheckoutForm() {
       const userErrors = addRes?.addProductsToCart?.user_errors || [];
       if (userErrors.length) throw new Error(userErrors[0]?.message || 'Error agregando productos al carrito.');
 
-
-        const regionIdInt = Number(form.regionId);
+      const regionIdInt = Number(form.regionId);
 
       const checkoutPaymentRes = await graphqlGuestClient.request(CREATE_CHECKOUT_PAYMENT, {
         cartId: checkoutCartId,
@@ -465,11 +467,7 @@ export default function CheckoutForm() {
               <div className="checkout__summary-row">
                 <span>Costo de envío</span>
                 <span>
-                  {cartSyncing || shippingLoading
-                    ? '...'
-                    : shippingCost !== null
-                      ? formatPrice(shippingCost)
-                      : '$0'}
+                  {cartSyncing || shippingLoading ? '...' : shippingCost !== null ? formatPrice(shippingCost) : '$0'}
                 </span>
               </div>
 
@@ -486,7 +484,14 @@ export default function CheckoutForm() {
               <span>{formatPrice(grandTotal)}</span>
             </div>
 
-            <button type="submit" className="checkout__pay-btn" disabled={processing} aria-busy={processing}>
+            <button
+              type="submit"
+              className="checkout__pay-btn"
+              disabled={!canSubmit}
+              aria-busy={processing}
+              aria-disabled={!canSubmit}
+              title={!canSubmit ? 'Completa todos los campos requeridos para continuar.' : undefined}
+            >
               {processing ? 'Procesando…' : 'Pagar'}
             </button>
           </section>

@@ -1,19 +1,14 @@
 'use client';
 
 import { use } from 'react';
-import { useRouter } from 'next/navigation';
 import Navbar from '../../../components/Navbar/Navbar';
 import Footer from '../../../components/Footer/Footer';
 import { useCategories } from '../../../hooks/useCategories';
 import { useProductsByCategory } from '../../../hooks/useProductsByCategory';
-import AddToCartButton from '../../../components/Cart/AddToCartButton';
+import ProductItem from '../../../components/SellerSection/ProductItem';
 import '../../../pages/CategoryPage.css';
 
-const formatPrice = (price) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(price || 0);
-
 function CategoryContent({ id }) {
-  const router = useRouter();
 
   const { data: catData } = useCategories();
 
@@ -67,38 +62,12 @@ function CategoryContent({ id }) {
             ) : (
               <div className="cat-products__grid" role="list" aria-label={`Productos de ${categoryName}`}>
                 {products.map((product) => (
-                  <article className="cat-card" key={`${product.sellerId}-${product.sku}`} role="listitem">
-                    <button
-                      type="button"
-                      className="cat-card__imageBtn"
-                      onClick={() => router.push(`/product/${product.id}?seller=${product.sellerId}`)}
-                      aria-label={`Ver ${product.name}`}
-                    >
-                      <img className="cat-card__img" src={product.image} alt={product.name} />
-                    </button>
-
-                    <div className="cat-card__body">
-                      <button
-                        type="button"
-                        className="cat-card__name"
-                        onClick={() => router.push(`/product/${product.id}?seller=${product.sellerId}`)}
-                      >
-                        {product.name}
-                      </button>
-
-                      <p className="cat-card__price">{formatPrice(product.price)}</p>
-
-                      <AddToCartButton
-                      className="cat-card__btn"
-                      product={product}
-                      sellerId={product.sellerId}
-                      sellerName={product.sellerName}
-                      quantity={1}
-                    >
-                      Agregar al carrito
-                    </AddToCartButton>
-                    </div>
-                  </article>
+                  <ProductItem
+                    key={`${product.sellerId}-${product.sku}`}
+                    product={product}
+                    sellerId={product.sellerId}
+                    sellerName={product.sellerName}
+                  />
                 ))}
               </div>
             )}

@@ -24,10 +24,10 @@
 .product-item__image {
   width: 100%;
   height: 250px;
-  object-fit: contain;      /* key: no crop, no zoom */
-  object-position: center;  /* centered inside */
+  object-fit: contain; /* key: no crop, no zoom */
+  object-position: center; /* centered inside */
   display: block;
-  background: #ffffff;      /* clean background when there are borders */
+  background: #ffffff; /* clean background when there are borders */
 }
 
 .product-item__divider {
@@ -111,6 +111,18 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* ✅ GRID MODE OVERRIDES (Seller detail page): let cards fill grid columns */
+.sdp-products__grid .product-item {
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+/* also let skeleton fill grid column if used inside */
+.sdp-products__grid .product-item--skeleton {
+  width: 100%;
+  flex: 1 1 auto;
+}
+
 /* Responsive */
 @media (max-width: 980px) {
   .product-item {
@@ -125,6 +137,12 @@
 
   .product-item__body {
     height: calc(300px - 200px - 1px);
+  }
+
+  /* ✅ keep grid behavior on seller page */
+  .sdp-products__grid .product-item {
+    width: 100%;
+    flex: 1 1 auto;
   }
 }
 

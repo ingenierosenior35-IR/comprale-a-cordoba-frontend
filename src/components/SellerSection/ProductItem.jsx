@@ -8,6 +8,11 @@ import './ProductItem.css';
 const formatPrice = (price) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(price || 0);
 
+function encodePathSegment(value) {
+  // Encodes everything unsafe for a URL path segment (spaces, ñ, %, etc)
+  return encodeURIComponent(String(value ?? ''));
+}
+
 function ProductItem({ product, sellerId, sellerName }) {
   const router = useRouter();
   const { addItem } = useCart();
@@ -15,21 +20,26 @@ function ProductItem({ product, sellerId, sellerName }) {
   const [added, setAdded] = useState(false);
 
   const handleClick = () => {
-    const query = sellerId ? `?seller=${sellerId}` : '';
-    router.push(`/product/${product.id}${query}`);
+    const query = sellerId ? `?seller=${encodeURIComponent(String(sellerId))}` : '';
+    const productSegment = encodePathSegment(product.id); // ✅ critical
+    router.push(`/product/${productSegment}${query}`);
   };
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
     addItem(product, sellerId, 1, sellerName);
 
-    // ✅ quick visual confirmation
     setAdded(true);
     window.setTimeout(() => setAdded(false), 900);
   };
 
   return (
-    <div className={`product-item${added ? ' product-item--added' : ''}`} role="listitem" onClick={handleClick} style={{ cursor: 'pointer' }}>
+    <div
+      className={`product-item${added ? ' product-item--added' : ''}`}
+      role="listitem"
+      onClick={handleClick}
+      style={{ cursor: 'pointer' }}
+    >
       <img className="product-item__image" src={product.image} alt={product.name} loading="lazy" />
       <hr className="product-item__divider" />
       <div className="product-item__body">
@@ -58,7 +68,6 @@ function ProductItem({ product, sellerId, sellerName }) {
         </button>
       </div>
 
-      {/* ✅ small toast inside card (subtle) */}
       <div className="product-item__addedToast" aria-hidden="true">
         Agregado
       </div>

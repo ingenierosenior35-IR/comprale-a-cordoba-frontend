@@ -56,6 +56,7 @@ export default function CheckoutForm() {
   });
 
   const [termsOpen, setTermsOpen] = useState(false);
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
   const [errors, setErrors] = useState({});
   const [processing, setProcessing] = useState(false);
@@ -279,7 +280,6 @@ export default function CheckoutForm() {
               Datos de envío
             </h2>
 
-            {/* ✅ First + Last name in the same row */}
             <div className="checkout__row checkout__row--names">
               <div className="checkout__field">
                 <input
@@ -442,71 +442,98 @@ export default function CheckoutForm() {
           </section>
 
           {/* Right */}
-          <section className="checkout__col checkout__col--summary" aria-labelledby="summary-title">
-            <h2 className="checkout__summary-title" id="summary-title">
-              Resumen de compra
-            </h2>
+          <section className={`checkout__col checkout__col--summary${mobileSummaryOpen ? ' checkout__col--summary-open' : ''}`} aria-labelledby="summary-title">
+            <div className="checkout__summary-head">
+              <h2 className="checkout__summary-title" id="summary-title">
+                Resumen
+              </h2>
 
-            <ul className="checkout__items" aria-label="Artículos en el carrito">
-              {items.map(({ product, quantity: qty }) => (
-                <li key={product.id} className="checkout__item">
-                  <img className="checkout__item-img" src={product.image} alt={product.name} />
+              <button
+                type="button"
+                className="checkout__summary-toggle"
+                onClick={() => setMobileSummaryOpen((v) => !v)}
+                aria-expanded={mobileSummaryOpen}
+                aria-controls="checkout-summary-items"
+              >
+                {mobileSummaryOpen ? 'Ocultar productos' : `Ver productos (${items.length})`}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            </div>
 
-                  <div className="checkout__item-info">
-                    <p className="checkout__item-name">{product.name}</p>
-                    <div className="checkout__item-qty" role="group" aria-label={`Cantidad de ${product.name}`}>
-                      <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty - 1)} aria-label="Reducir">
-                        −
-                      </button>
-                      <span aria-live="polite">{qty}</span>
-                      <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty + 1)} aria-label="Aumentar">
-                        +
-                      </button>
+            <div id="checkout-summary-items" className="checkout__summary-collapsible" hidden={!mobileSummaryOpen}>
+              <ul className="checkout__items" aria-label="Artículos en el carrito">
+                {items.map(({ product, quantity: qty }) => (
+                  <li key={product.id} className="checkout__item">
+                    <img className="checkout__item-img" src={product.image} alt={product.name} />
+
+                    <div className="checkout__item-info">
+                      <p className="checkout__item-name">{product.name}</p>
+                      <div className="checkout__item-qty" role="group" aria-label={`Cantidad de ${product.name}`}>
+                        <button
+                          type="button"
+                          className="checkout__qty-btn"
+                          onClick={() => updateQuantity(product.id, qty - 1)}
+                          aria-label="Reducir"
+                        >
+                          −
+                        </button>
+                        <span aria-live="polite">{qty}</span>
+                        <button
+                          type="button"
+                          className="checkout__qty-btn"
+                          onClick={() => updateQuantity(product.id, qty + 1)}
+                          aria-label="Aumentar"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
-                  <p className="checkout__item-price">{formatPrice(product.price * qty)}</p>
-                </li>
-              ))}
-            </ul>
+                    <p className="checkout__item-price">{formatPrice(product.price * qty)}</p>
+                  </li>
+                ))}
+              </ul>
 
-            <a href="/" className="checkout__add-more">
-              + Agregar más productos
-            </a>
+              <a href="/" className="checkout__add-more">
+                + Agregar más productos
+              </a>
 
-            <hr className="checkout__divider" />
-
-            <div className="checkout__summary-spacer" />
-
-            <div className="checkout__summary">
-              <div className="checkout__summary-row">
-                <span>Costo de envío</span>
-                <span>{cartSyncing || shippingLoading ? '...' : shippingCost !== null ? formatPrice(shippingCost) : '$0'}</span>
-              </div>
-
-              <div className="checkout__summary-row">
-                <span>Subtotal</span>
-                <span>{formatPrice(total)}</span>
-              </div>
+              <hr className="checkout__divider" />
             </div>
 
-            <hr className="checkout__divider" />
+            <div className="checkout__summary-sticky">
+              <div className="checkout__summary">
+                <div className="checkout__summary-row">
+                  <span>Costo de envío</span>
+                  <span>{cartSyncing || shippingLoading ? '...' : shippingCost !== null ? formatPrice(shippingCost) : '$0'}</span>
+                </div>
 
-            <div className="checkout__summary-row checkout__summary-row--total">
-              <span>Total</span>
-              <span>{formatPrice(grandTotal)}</span>
+                <div className="checkout__summary-row">
+                  <span>Subtotal</span>
+                  <span>{formatPrice(total)}</span>
+                </div>
+              </div>
+
+              <hr className="checkout__divider" />
+
+              <div className="checkout__summary-row checkout__summary-row--total">
+                <span>Total</span>
+                <span>{formatPrice(grandTotal)}</span>
+              </div>
+
+              <button
+                type="submit"
+                className="checkout__pay-btn"
+                disabled={!canSubmit}
+                aria-busy={processing}
+                aria-disabled={!canSubmit}
+                title={!canSubmit ? 'Completa todos los campos requeridos para continuar.' : undefined}
+              >
+                {processing ? 'Procesando…' : 'Pagar'}
+              </button>
             </div>
-
-            <button
-              type="submit"
-              className="checkout__pay-btn"
-              disabled={!canSubmit}
-              aria-busy={processing}
-              aria-disabled={!canSubmit}
-              title={!canSubmit ? 'Completa todos los campos requeridos para continuar.' : undefined}
-            >
-              {processing ? 'Procesando…' : 'Pagar'}
-            </button>
           </section>
         </form>
       </main>

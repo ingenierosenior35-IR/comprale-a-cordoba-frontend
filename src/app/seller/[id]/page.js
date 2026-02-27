@@ -131,7 +131,7 @@ function SellerDetailContent({ id }) {
 
                 {productsQ.isFetchingNextPage ? <p className="sdp-products__state">Cargando más productos…</p> : null}
                 {!productsQ.hasNextPage && products.length > 0 ? (
-                  <p className="sdp-products__state">Ya viste todos los productos.</p>
+                  <p className="sdp-products__state"></p>
                 ) : null}
               </>
             )}

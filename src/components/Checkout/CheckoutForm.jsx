@@ -12,10 +12,6 @@ import TermsModal from './TermsModal';
 import { TERMS_AND_CONDITIONS_HTML } from '../../constants/termsAndConditions';
 import './Checkout.css';
 
-const DEFAULT_CARRIER_CODE = 'envios';
-const DEFAULT_METHOD_CODE = 'inter';
-const DEFAULT_PAYMENT_CODE = 'payzen_standard';
-
 const formatPrice = (price) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(price || 0);
 
@@ -56,7 +52,37 @@ export default function CheckoutForm() {
   });
 
   const [termsOpen, setTermsOpen] = useState(false);
+
+  // ✅ Mobile: collapsed bar by default; swipe up expands
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
+
+  // ✅ swipe handling
+  const swipeStartYRef = useRef(null);
+  const swipeDeltaRef = useRef(0);
+
+  const handleSummaryTouchStart = (e) => {
+    const y = e.touches?.[0]?.clientY;
+    if (typeof y !== 'number') return;
+    swipeStartYRef.current = y;
+    swipeDeltaRef.current = 0;
+  };
+
+  const handleSummaryTouchMove = (e) => {
+    const startY = swipeStartYRef.current;
+    const y = e.touches?.[0]?.clientY;
+    if (typeof startY !== 'number' || typeof y !== 'number') return;
+    swipeDeltaRef.current = y - startY; // positive = down, negative = up
+  };
+
+  const handleSummaryTouchEnd = () => {
+    const delta = swipeDeltaRef.current;
+    swipeStartYRef.current = null;
+    swipeDeltaRef.current = 0;
+
+    const THRESHOLD = 30; // px
+    if (delta < -THRESHOLD) setMobileSummaryOpen(true); // swipe up
+    if (delta > THRESHOLD) setMobileSummaryOpen(false); // swipe down
+  };
 
   const [errors, setErrors] = useState({});
   const [processing, setProcessing] = useState(false);
@@ -441,8 +467,19 @@ export default function CheckoutForm() {
             </div>
           </section>
 
-          {/* Right */}
-          <section className={`checkout__col checkout__col--summary${mobileSummaryOpen ? ' checkout__col--summary-open' : ''}`} aria-labelledby="summary-title">
+          {/* Mobile bottom bar / sheet */}
+          <section
+            className={`checkout__col checkout__col--summary${
+              mobileSummaryOpen ? ' checkout__col--summary-open' : ' checkout__col--summary-collapsed'
+            }`}
+            aria-labelledby="summary-title"
+            onTouchStart={handleSummaryTouchStart}
+            onTouchMove={handleSummaryTouchMove}
+            onTouchEnd={handleSummaryTouchEnd}
+          >
+            {/* handle bar (swipe target) */}
+            <div className="checkout__sheet-handle" aria-hidden="true" />
+
             <div className="checkout__summary-head">
               <h2 className="checkout__summary-title" id="summary-title">
                 Resumen
@@ -455,7 +492,7 @@ export default function CheckoutForm() {
                 aria-expanded={mobileSummaryOpen}
                 aria-controls="checkout-summary-items"
               >
-                {mobileSummaryOpen ? 'Ocultar productos' : `Ver productos (${items.length})`}
+                {mobileSummaryOpen ? 'Ocultar detalle' : `Detalle (${items.length})`}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
@@ -467,30 +504,18 @@ export default function CheckoutForm() {
                 {items.map(({ product, quantity: qty }) => (
                   <li key={product.id} className="checkout__item">
                     <img className="checkout__item-img" src={product.image} alt={product.name} />
-
                     <div className="checkout__item-info">
                       <p className="checkout__item-name">{product.name}</p>
                       <div className="checkout__item-qty" role="group" aria-label={`Cantidad de ${product.name}`}>
-                        <button
-                          type="button"
-                          className="checkout__qty-btn"
-                          onClick={() => updateQuantity(product.id, qty - 1)}
-                          aria-label="Reducir"
-                        >
+                        <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty - 1)} aria-label="Reducir">
                           −
                         </button>
                         <span aria-live="polite">{qty}</span>
-                        <button
-                          type="button"
-                          className="checkout__qty-btn"
-                          onClick={() => updateQuantity(product.id, qty + 1)}
-                          aria-label="Aumentar"
-                        >
+                        <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty + 1)} aria-label="Aumentar">
                           +
                         </button>
                       </div>
                     </div>
-
                     <p className="checkout__item-price">{formatPrice(product.price * qty)}</p>
                   </li>
                 ))}

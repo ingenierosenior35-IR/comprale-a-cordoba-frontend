@@ -3,9 +3,8 @@
 import { useEffect, useRef } from 'react';
 import './Hero.css';
 
-// ✅ Put your .jpeg in /public and update this path.
-// Example: /public/hero-banner.jpeg  =>  src="/hero-banner.jpeg"
 const HERO_BANNER_URL = '/hero-banner.jpeg';
+const HERO_BANNER_MOBILE_URL = '/banner-mobile.jpg';
 
 function Hero({ nextSectionRef }) {
   const heroRef = useRef(null);
@@ -35,16 +34,19 @@ function Hero({ nextSectionRef }) {
 
   return (
     <section className="hero" ref={heroRef} id="hero">
-      {/* ✅ Image banner (replaces video) */}
-      <img
-        className="hero__media"
-        src={HERO_BANNER_URL}
-        alt=""
-        aria-hidden="true"
-        loading="eager"
-        decoding="async"
-        fetchPriority="high"
-      />
+      {/* ✅ Responsive banner: mobile vs desktop */}
+      <picture className="hero__media" aria-hidden="true">
+        <source media="(max-width: 768px)" srcSet={HERO_BANNER_MOBILE_URL} />
+        <img
+          className="hero__media-img"
+          src={HERO_BANNER_URL}
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+        />
+      </picture>
 
       <div className="hero__overlay" />
 

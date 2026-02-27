@@ -8,6 +8,8 @@ import { useShippingQuote } from '../../hooks/useShippingQuote';
 import graphqlGuestClient from '../../lib/graphqlGuestClient';
 import { CREATE_GUEST_CART, ADD_PRODUCTS_TO_CART, CREATE_CHECKOUT_PAYMENT } from '../../graphql/checkout/mutations';
 import Navbar from '../Navbar/Navbar';
+import TermsModal from './TermsModal';
+import { TERMS_AND_CONDITIONS_HTML } from '../../constants/termsAndConditions';
 import './Checkout.css';
 
 const DEFAULT_CARRIER_CODE = 'envios';
@@ -52,11 +54,12 @@ export default function CheckoutForm() {
     acceptData: false,
   });
 
+  const [termsOpen, setTermsOpen] = useState(false);
+
   const [errors, setErrors] = useState({});
   const [processing, setProcessing] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  // ✅ derived: block pay button if invalid
   const canSubmit = useMemo(() => {
     if (processing) return false;
     if (!items?.length) return false;
@@ -72,7 +75,6 @@ export default function CheckoutForm() {
     return true;
   }, [processing, items, form]);
 
-  // Cart used ONLY for shipping estimation (to avoid duplication issues)
   const [estimateCartId, setEstimateCartId] = useState('');
   const [cartSyncing, setCartSyncing] = useState(false);
   const syncNonceRef = useRef(0);
@@ -257,6 +259,9 @@ export default function CheckoutForm() {
   return (
     <div className="checkout">
       <Navbar />
+
+      <TermsModal open={termsOpen} html={TERMS_AND_CONDITIONS_HTML} onClose={() => setTermsOpen(false)} />
+
       <main className="checkout__main">
         {submitError && (
           <div className="checkout__submit-error" role="alert">
@@ -392,9 +397,13 @@ export default function CheckoutForm() {
               <input type="checkbox" name="acceptTerms" checked={form.acceptTerms} onChange={handleChange} />
               <span>
                 Aceptar{' '}
-                <a href="#" className="checkout__link">
+                <button
+                  type="button"
+                  className="checkout__link checkout__link--btn"
+                  onClick={() => setTermsOpen(true)}
+                >
                   Términos y Condiciones
-                </a>
+                </button>
               </span>
             </label>
             {errors.acceptTerms && <span className="checkout__error">{errors.acceptTerms}</span>}

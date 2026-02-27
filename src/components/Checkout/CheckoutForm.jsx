@@ -53,12 +53,19 @@ export default function CheckoutForm() {
 
   const [termsOpen, setTermsOpen] = useState(false);
 
-  // ✅ Mobile: collapsed bar by default; swipe up expands
+  // ✅ Mobile summary bottom-sheet
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
-  // ✅ Mobile city search modal
-  const [cityOpen, setCityOpen] = useState(false);
+  // ✅ City picker: separate states for desktop vs mobile (no breakpoint hooks needed)
+  const [cityDesktopOpen, setCityDesktopOpen] = useState(false);
+  const [cityMobileOpen, setCityMobileOpen] = useState(false);
   const [cityQuery, setCityQuery] = useState('');
+
+  const cityDesktopPopoverRef = useRef(null);
+  const cityDesktopInputRef = useRef(null);
+
+  const cityMobileSheetRef = useRef(null);
+  const cityMobileInputRef = useRef(null);
 
   const filteredCities = useMemo(() => {
     const q = cityQuery.trim().toLowerCase();
@@ -66,7 +73,7 @@ export default function CheckoutForm() {
     return cities.filter((c) => String(c?.name || '').toLowerCase().includes(q));
   }, [cities, cityQuery]);
 
-  // ✅ swipe handling
+  // ✅ swipe handling (mobile)
   const summaryRef = useRef(null);
   const swipeStartYRef = useRef(null);
   const swipeDeltaRef = useRef(0);
@@ -77,14 +84,9 @@ export default function CheckoutForm() {
       setMobileSummaryOpen(open);
       return;
     }
-
-    // force a transition for nice feel even when state changes via swipe/tap
     el.classList.add('checkout__sheet-animating');
     window.requestAnimationFrame(() => setMobileSummaryOpen(open));
-
-    window.setTimeout(() => {
-      el.classList.remove('checkout__sheet-animating');
-    }, 320);
+    window.setTimeout(() => el.classList.remove('checkout__sheet-animating'), 360);
   };
 
   const handleSummaryTouchStart = (e) => {
@@ -98,7 +100,7 @@ export default function CheckoutForm() {
     const startY = swipeStartYRef.current;
     const y = e.touches?.[0]?.clientY;
     if (typeof startY !== 'number' || typeof y !== 'number') return;
-    swipeDeltaRef.current = y - startY; // positive = down, negative = up
+    swipeDeltaRef.current = y - startY;
   };
 
   const handleSummaryTouchEnd = () => {
@@ -106,10 +108,59 @@ export default function CheckoutForm() {
     swipeStartYRef.current = null;
     swipeDeltaRef.current = 0;
 
-    const THRESHOLD = 30; // px
-    if (delta < -THRESHOLD) animateSummaryTo(true); // swipe up
-    if (delta > THRESHOLD) animateSummaryTo(false); // swipe down
+    const THRESHOLD = 30;
+    if (delta < -THRESHOLD) animateSummaryTo(true);
+    if (delta > THRESHOLD) animateSummaryTo(false);
   };
+
+  // ✅ Desktop: close city popover on outside click / ESC
+  useEffect(() => {
+    if (!cityDesktopOpen) return;
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setCityDesktopOpen(false);
+    };
+
+    const onPointerDown = (e) => {
+      const pop = cityDesktopPopoverRef.current;
+      if (!pop) return;
+      if (pop.contains(e.target)) return;
+      setCityDesktopOpen(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('pointerdown', onPointerDown);
+
+    const t = window.setTimeout(() => {
+      try {
+        cityDesktopInputRef.current?.focus?.({ preventScroll: true });
+      } catch {
+        cityDesktopInputRef.current?.focus?.();
+      }
+    }, 0);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.clearTimeout(t);
+    };
+  }, [cityDesktopOpen]);
+
+  // ✅ Mobile: focus + scroll to avoid keyboard hiding the sheet on first open
+  useEffect(() => {
+    if (!cityMobileOpen) return;
+
+    const t = window.setTimeout(() => {
+      try {
+        cityMobileInputRef.current?.focus?.({ preventScroll: true });
+      } catch {
+        cityMobileInputRef.current?.focus?.();
+      }
+      cityMobileSheetRef.current?.scrollIntoView?.({ block: 'end', behavior: 'smooth' });
+    }, 120);
+
+    return () => window.clearTimeout(t);
+  }, [cityMobileOpen]);
 
   const [errors, setErrors] = useState({});
   const [processing, setProcessing] = useState(false);
@@ -169,9 +220,7 @@ export default function CheckoutForm() {
         if (userErrors.length)
           throw new Error(userErrors[0]?.message || 'Error agregando productos al carrito (cotización).');
 
-        if (!cancelled && nonce === syncNonceRef.current) {
-          setEstimateCartId(newCartId);
-        }
+        if (!cancelled && nonce === syncNonceRef.current) setEstimateCartId(newCartId);
       } catch (e) {
         console.error('Estimate cart rebuild error:', e);
         if (!cancelled) setEstimateCartId('');
@@ -181,7 +230,6 @@ export default function CheckoutForm() {
     }
 
     rebuildEstimateCart();
-
     return () => {
       cancelled = true;
     };
@@ -214,14 +262,27 @@ export default function CheckoutForm() {
       regionId: city?.region?.id ? String(city.region.id) : '',
     }));
     clearFieldError('cityId');
-    setCityOpen(false);
+    setCityDesktopOpen(false);
+    setCityMobileOpen(false);
     setCityQuery('');
+  };
+
+  const openCityPicker = () => {
+    // Use CSS to show the right UI:
+    // - Desktop popover is inside the field (cityDesktopOpen)
+    // - Mobile uses the modal (cityMobileOpen)
+    // We can open both, and CSS will hide one; but that complicates focus.
+    // So we pick based on viewport width:
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
+      setCityMobileOpen(true);
+    } else {
+      setCityDesktopOpen(true);
+    }
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    // Desktop fallback select still supported
     if (name === 'cityId') {
       const city = cities.find((c) => String(c.id) === String(value)) || null;
 
@@ -333,19 +394,36 @@ export default function CheckoutForm() {
 
       <TermsModal open={termsOpen} html={TERMS_AND_CONDITIONS_HTML} onClose={() => setTermsOpen(false)} />
 
-      {/* ✅ City search modal (mobile) */}
-      {cityOpen && (
+      {/* ✅ Mobile city modal ONLY */}
+      {cityMobileOpen && (
         <div className="checkout__cityModal" role="dialog" aria-modal="true" aria-label="Seleccionar ciudad">
-          <button type="button" className="checkout__cityBackdrop" onClick={() => setCityOpen(false)} aria-label="Cerrar" />
-          <div className="checkout__citySheet">
+          <button
+            type="button"
+            className="checkout__cityBackdrop"
+            onClick={() => {
+              setCityMobileOpen(false);
+              setCityQuery('');
+            }}
+            aria-label="Cerrar"
+          />
+          <div className="checkout__citySheet" ref={cityMobileSheetRef}>
             <div className="checkout__citySheetHead">
               <p className="checkout__citySheetTitle">Ciudad</p>
-              <button type="button" className="checkout__cityClose" onClick={() => setCityOpen(false)} aria-label="Cerrar">
+              <button
+                type="button"
+                className="checkout__cityClose"
+                onClick={() => {
+                  setCityMobileOpen(false);
+                  setCityQuery('');
+                }}
+                aria-label="Cerrar"
+              >
                 ✕
               </button>
             </div>
 
             <input
+              ref={cityMobileInputRef}
               className="checkout__input checkout__citySearch"
               type="search"
               placeholder="Buscar ciudad…"
@@ -477,37 +555,56 @@ export default function CheckoutForm() {
               {errors.phone && <span className="checkout__error">{errors.phone}</span>}
             </div>
 
-            {/* ✅ Mobile city picker with search (keeps select for desktop) */}
-            <div className="checkout__field checkout__field--full">
+            {/* ✅ City field with DESKTOP inline popover */}
+            <div className="checkout__field checkout__field--full checkout__cityField">
               <button
                 type="button"
                 className={`checkout__input checkout__cityBtn${errors.cityId ? ' checkout__input--error' : ''}`}
-                onClick={() => setCityOpen(true)}
+                onClick={() => {
+                  // on desktop open inline, on mobile open sheet
+                  openCityPicker();
+                }}
                 aria-label="Ciudad"
+                aria-expanded={cityDesktopOpen || cityMobileOpen}
               >
                 <span className={form.cityName ? '' : 'checkout__cityPlaceholder'}>{form.cityName || 'Ciudad'}</span>
                 <span aria-hidden="true" className="checkout__cityChevron">
                   ▾
                 </span>
               </button>
-              {errors.cityId && <span className="checkout__error">{errors.cityId}</span>}
-            </div>
 
-            <div className="checkout__field checkout__field--full checkout__citySelectDesktop">
-              <select
-                name="cityId"
-                className={`checkout__input checkout__select${errors.cityId ? ' checkout__input--error' : ''}`}
-                value={form.cityId}
-                onChange={handleChange}
-                aria-label="Ciudad"
-              >
-                <option value="">Ciudad</option>
-                {cities.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              {errors.cityId && <span className="checkout__error">{errors.cityId}</span>}
+
+              {/* Desktop inline popover */}
+              {cityDesktopOpen && (
+                <div className="checkout__cityPopover" ref={cityDesktopPopoverRef} role="listbox" aria-label="Lista de ciudades">
+                  <input
+                    ref={cityDesktopInputRef}
+                    className="checkout__input checkout__citySearchInline"
+                    type="search"
+                    placeholder="Buscar ciudad…"
+                    value={cityQuery}
+                    onChange={(e) => setCityQuery(e.target.value)}
+                  />
+
+                  <div className="checkout__cityListInline">
+                    {filteredCities.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        className="checkout__cityOption"
+                        onClick={() => handleCitySelect(c)}
+                        role="option"
+                        aria-selected={String(form.cityId) === String(c.id)}
+                      >
+                        <span>{c.name}</span>
+                        <span className="checkout__cityDept">{c?.region?.name || ''}</span>
+                      </button>
+                    ))}
+                    {filteredCities.length === 0 ? <p className="checkout__cityEmpty">No encontramos esa ciudad.</p> : null}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="checkout__field checkout__field--full">
@@ -564,56 +661,11 @@ export default function CheckoutForm() {
             </div>
           </section>
 
-          {/* Mobile bottom bar / sheet */}
-          <section
-            ref={summaryRef}
-            className={`checkout__col checkout__col--summary${
-              mobileSummaryOpen ? ' checkout__col--summary-open' : ' checkout__col--summary-collapsed'
-            }`}
-            aria-labelledby="summary-title"
-            onTouchStart={handleSummaryTouchStart}
-            onTouchMove={handleSummaryTouchMove}
-            onTouchEnd={handleSummaryTouchEnd}
-          >
-            <button
-              type="button"
-              className="checkout__sheet-tapArea"
-              aria-label={mobileSummaryOpen ? 'Ocultar detalle' : 'Ver detalle'}
-              onClick={() => animateSummaryTo(!mobileSummaryOpen)}
-            >
-              <div className="checkout__sheet-handle" aria-hidden="true" />
-            </button>
+          {/* ✅ Desktop summary (fixed height + internal scroll) */}
+          <section className="checkout__col checkout__col--summary checkout__summary-desktop" aria-label="Resumen de compra">
+            <h2 className="checkout__summary-title">Resumen de compra</h2>
 
-            <div className="checkout__summary-head">
-              <h2 className="checkout__summary-title" id="summary-title">
-                Resumen
-              </h2>
-
-              <button
-                type="button"
-                className="checkout__summary-toggle"
-                onClick={() => animateSummaryTo(!mobileSummaryOpen)}
-                aria-expanded={mobileSummaryOpen}
-                aria-controls="checkout-summary-items"
-              >
-                {mobileSummaryOpen ? 'Ocultar detalle' : `Detalle (${items.length})`}
-                {/* ✅ arrow should point DOWN when open (as requested) */}
-                <svg
-                  className="checkout__summary-chevron"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  aria-hidden="true"
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-            </div>
-
-            <div id="checkout-summary-items" className="checkout__summary-collapsible" hidden={!mobileSummaryOpen}>
+            <div className="checkout__summary-scroll">
               <ul className="checkout__items" aria-label="Artículos en el carrito">
                 {items.map(({ product, quantity: qty }) => (
                   <li key={product.id} className="checkout__item">
@@ -621,21 +673,101 @@ export default function CheckoutForm() {
                     <div className="checkout__item-info">
                       <p className="checkout__item-name">{product.name}</p>
                       <div className="checkout__item-qty" role="group" aria-label={`Cantidad de ${product.name}`}>
-                        <button
-                          type="button"
-                          className="checkout__qty-btn"
-                          onClick={() => updateQuantity(product.id, qty - 1)}
-                          aria-label="Reducir"
-                        >
+                        <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty - 1)} aria-label="Reducir">
                           −
                         </button>
                         <span aria-live="polite">{qty}</span>
-                        <button
-                          type="button"
-                          className="checkout__qty-btn"
-                          onClick={() => updateQuantity(product.id, qty + 1)}
-                          aria-label="Aumentar"
-                        >
+                        <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty + 1)} aria-label="Aumentar">
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <p className="checkout__item-price">{formatPrice(product.price * qty)}</p>
+                  </li>
+                ))}
+              </ul>
+
+              <a href="/" className="checkout__add-more">
+                + Agregar más productos
+              </a>
+            </div>
+
+            <div className="checkout__summary-bottom">
+              <hr className="checkout__divider" />
+
+              <div className="checkout__summary">
+                <div className="checkout__summary-row">
+                  <span>Costo de envío</span>
+                  <span>{cartSyncing || shippingLoading ? '...' : shippingCost !== null ? formatPrice(shippingCost) : '$0'}</span>
+                </div>
+
+                <div className="checkout__summary-row">
+                  <span>Subtotal</span>
+                  <span>{formatPrice(total)}</span>
+                </div>
+              </div>
+
+              <hr className="checkout__divider" />
+
+              <div className="checkout__summary-row checkout__summary-row--total">
+                <span>Total</span>
+                <span>{formatPrice(grandTotal)}</span>
+              </div>
+
+              <button
+                type="submit"
+                className="checkout__pay-btn"
+                disabled={!canSubmit}
+                aria-busy={processing}
+                aria-disabled={!canSubmit}
+                title={!canSubmit ? 'Completa todos los campos requeridos para continuar.' : undefined}
+              >
+                {processing ? 'Procesando…' : 'Pagar'}
+              </button>
+            </div>
+          </section>
+
+          {/* ✅ Mobile bottom sheet summary (existing behavior) */}
+          <section
+            ref={summaryRef}
+            className={`checkout__col checkout__col--summary checkout__summary-mobile${
+              mobileSummaryOpen ? ' checkout__col--summary-open' : ' checkout__col--summary-collapsed'
+            }`}
+            aria-labelledby="summary-title-mobile"
+            onTouchStart={handleSummaryTouchStart}
+            onTouchMove={handleSummaryTouchMove}
+            onTouchEnd={handleSummaryTouchEnd}
+          >
+            <button type="button" className="checkout__sheet-tapArea" onClick={() => animateSummaryTo(!mobileSummaryOpen)} aria-label="Abrir o cerrar resumen">
+              <div className="checkout__sheet-handle" aria-hidden="true" />
+            </button>
+
+            <div className="checkout__summary-head">
+              <h2 className="checkout__summary-title" id="summary-title-mobile">
+                Resumen
+              </h2>
+
+              <button type="button" className="checkout__summary-toggle" onClick={() => animateSummaryTo(!mobileSummaryOpen)} aria-expanded={mobileSummaryOpen}>
+                {mobileSummaryOpen ? 'Ocultar detalle' : `Detalle (${items.length})`}
+                <svg className="checkout__summary-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            </div>
+
+            <div className={`checkout__summary-collapsible${mobileSummaryOpen ? ' checkout__summary-collapsible--open' : ''}`}>
+              <ul className="checkout__items" aria-label="Artículos en el carrito">
+                {items.map(({ product, quantity: qty }) => (
+                  <li key={product.id} className="checkout__item">
+                    <img className="checkout__item-img" src={product.image} alt={product.name} />
+                    <div className="checkout__item-info">
+                      <p className="checkout__item-name">{product.name}</p>
+                      <div className="checkout__item-qty" role="group" aria-label={`Cantidad de ${product.name}`}>
+                        <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty - 1)} aria-label="Reducir">
+                          −
+                        </button>
+                        <span aria-live="polite">{qty}</span>
+                        <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty + 1)} aria-label="Aumentar">
                           +
                         </button>
                       </div>
@@ -656,9 +788,7 @@ export default function CheckoutForm() {
               <div className="checkout__summary">
                 <div className="checkout__summary-row">
                   <span>Costo de envío</span>
-                  <span>
-                    {cartSyncing || shippingLoading ? '...' : shippingCost !== null ? formatPrice(shippingCost) : '$0'}
-                  </span>
+                  <span>{cartSyncing || shippingLoading ? '...' : shippingCost !== null ? formatPrice(shippingCost) : '$0'}</span>
                 </div>
 
                 <div className="checkout__summary-row">

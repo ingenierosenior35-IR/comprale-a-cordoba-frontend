@@ -56,9 +56,36 @@ export default function CheckoutForm() {
   // ✅ Mobile: collapsed bar by default; swipe up expands
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
+  // ✅ Mobile city search modal
+  const [cityOpen, setCityOpen] = useState(false);
+  const [cityQuery, setCityQuery] = useState('');
+
+  const filteredCities = useMemo(() => {
+    const q = cityQuery.trim().toLowerCase();
+    if (!q) return cities;
+    return cities.filter((c) => String(c?.name || '').toLowerCase().includes(q));
+  }, [cities, cityQuery]);
+
   // ✅ swipe handling
+  const summaryRef = useRef(null);
   const swipeStartYRef = useRef(null);
   const swipeDeltaRef = useRef(0);
+
+  const animateSummaryTo = (open) => {
+    const el = summaryRef.current;
+    if (!el) {
+      setMobileSummaryOpen(open);
+      return;
+    }
+
+    // force a transition for nice feel even when state changes via swipe/tap
+    el.classList.add('checkout__sheet-animating');
+    window.requestAnimationFrame(() => setMobileSummaryOpen(open));
+
+    window.setTimeout(() => {
+      el.classList.remove('checkout__sheet-animating');
+    }, 320);
+  };
 
   const handleSummaryTouchStart = (e) => {
     const y = e.touches?.[0]?.clientY;
@@ -80,8 +107,8 @@ export default function CheckoutForm() {
     swipeDeltaRef.current = 0;
 
     const THRESHOLD = 30; // px
-    if (delta < -THRESHOLD) setMobileSummaryOpen(true); // swipe up
-    if (delta > THRESHOLD) setMobileSummaryOpen(false); // swipe down
+    if (delta < -THRESHOLD) animateSummaryTo(true); // swipe up
+    if (delta > THRESHOLD) animateSummaryTo(false); // swipe down
   };
 
   const [errors, setErrors] = useState({});
@@ -178,9 +205,23 @@ export default function CheckoutForm() {
     });
   };
 
+  const handleCitySelect = (city) => {
+    setForm((f) => ({
+      ...f,
+      cityId: String(city?.id || ''),
+      cityName: city?.name || '',
+      department: city?.region?.name || '',
+      regionId: city?.region?.id ? String(city.region.id) : '',
+    }));
+    clearFieldError('cityId');
+    setCityOpen(false);
+    setCityQuery('');
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
+    // Desktop fallback select still supported
     if (name === 'cityId') {
       const city = cities.find((c) => String(c.id) === String(value)) || null;
 
@@ -292,6 +333,47 @@ export default function CheckoutForm() {
 
       <TermsModal open={termsOpen} html={TERMS_AND_CONDITIONS_HTML} onClose={() => setTermsOpen(false)} />
 
+      {/* ✅ City search modal (mobile) */}
+      {cityOpen && (
+        <div className="checkout__cityModal" role="dialog" aria-modal="true" aria-label="Seleccionar ciudad">
+          <button type="button" className="checkout__cityBackdrop" onClick={() => setCityOpen(false)} aria-label="Cerrar" />
+          <div className="checkout__citySheet">
+            <div className="checkout__citySheetHead">
+              <p className="checkout__citySheetTitle">Ciudad</p>
+              <button type="button" className="checkout__cityClose" onClick={() => setCityOpen(false)} aria-label="Cerrar">
+                ✕
+              </button>
+            </div>
+
+            <input
+              className="checkout__input checkout__citySearch"
+              type="search"
+              placeholder="Buscar ciudad…"
+              value={cityQuery}
+              onChange={(e) => setCityQuery(e.target.value)}
+              autoFocus
+            />
+
+            <div className="checkout__cityList" role="listbox" aria-label="Lista de ciudades">
+              {filteredCities.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  className="checkout__cityOption"
+                  onClick={() => handleCitySelect(c)}
+                  role="option"
+                  aria-selected={String(form.cityId) === String(c.id)}
+                >
+                  <span>{c.name}</span>
+                  <span className="checkout__cityDept">{c?.region?.name || ''}</span>
+                </button>
+              ))}
+              {filteredCities.length === 0 ? <p className="checkout__cityEmpty">No encontramos esa ciudad.</p> : null}
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="checkout__main">
         {submitError && (
           <div className="checkout__submit-error" role="alert">
@@ -395,7 +477,23 @@ export default function CheckoutForm() {
               {errors.phone && <span className="checkout__error">{errors.phone}</span>}
             </div>
 
+            {/* ✅ Mobile city picker with search (keeps select for desktop) */}
             <div className="checkout__field checkout__field--full">
+              <button
+                type="button"
+                className={`checkout__input checkout__cityBtn${errors.cityId ? ' checkout__input--error' : ''}`}
+                onClick={() => setCityOpen(true)}
+                aria-label="Ciudad"
+              >
+                <span className={form.cityName ? '' : 'checkout__cityPlaceholder'}>{form.cityName || 'Ciudad'}</span>
+                <span aria-hidden="true" className="checkout__cityChevron">
+                  ▾
+                </span>
+              </button>
+              {errors.cityId && <span className="checkout__error">{errors.cityId}</span>}
+            </div>
+
+            <div className="checkout__field checkout__field--full checkout__citySelectDesktop">
               <select
                 name="cityId"
                 className={`checkout__input checkout__select${errors.cityId ? ' checkout__input--error' : ''}`}
@@ -410,7 +508,6 @@ export default function CheckoutForm() {
                   </option>
                 ))}
               </select>
-              {errors.cityId && <span className="checkout__error">{errors.cityId}</span>}
             </div>
 
             <div className="checkout__field checkout__field--full">
@@ -469,6 +566,7 @@ export default function CheckoutForm() {
 
           {/* Mobile bottom bar / sheet */}
           <section
+            ref={summaryRef}
             className={`checkout__col checkout__col--summary${
               mobileSummaryOpen ? ' checkout__col--summary-open' : ' checkout__col--summary-collapsed'
             }`}
@@ -477,8 +575,14 @@ export default function CheckoutForm() {
             onTouchMove={handleSummaryTouchMove}
             onTouchEnd={handleSummaryTouchEnd}
           >
-            {/* handle bar (swipe target) */}
-            <div className="checkout__sheet-handle" aria-hidden="true" />
+            <button
+              type="button"
+              className="checkout__sheet-tapArea"
+              aria-label={mobileSummaryOpen ? 'Ocultar detalle' : 'Ver detalle'}
+              onClick={() => animateSummaryTo(!mobileSummaryOpen)}
+            >
+              <div className="checkout__sheet-handle" aria-hidden="true" />
+            </button>
 
             <div className="checkout__summary-head">
               <h2 className="checkout__summary-title" id="summary-title">
@@ -488,12 +592,22 @@ export default function CheckoutForm() {
               <button
                 type="button"
                 className="checkout__summary-toggle"
-                onClick={() => setMobileSummaryOpen((v) => !v)}
+                onClick={() => animateSummaryTo(!mobileSummaryOpen)}
                 aria-expanded={mobileSummaryOpen}
                 aria-controls="checkout-summary-items"
               >
                 {mobileSummaryOpen ? 'Ocultar detalle' : `Detalle (${items.length})`}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                {/* ✅ arrow should point DOWN when open (as requested) */}
+                <svg
+                  className="checkout__summary-chevron"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  aria-hidden="true"
+                >
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
               </button>
@@ -507,11 +621,21 @@ export default function CheckoutForm() {
                     <div className="checkout__item-info">
                       <p className="checkout__item-name">{product.name}</p>
                       <div className="checkout__item-qty" role="group" aria-label={`Cantidad de ${product.name}`}>
-                        <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty - 1)} aria-label="Reducir">
+                        <button
+                          type="button"
+                          className="checkout__qty-btn"
+                          onClick={() => updateQuantity(product.id, qty - 1)}
+                          aria-label="Reducir"
+                        >
                           −
                         </button>
                         <span aria-live="polite">{qty}</span>
-                        <button type="button" className="checkout__qty-btn" onClick={() => updateQuantity(product.id, qty + 1)} aria-label="Aumentar">
+                        <button
+                          type="button"
+                          className="checkout__qty-btn"
+                          onClick={() => updateQuantity(product.id, qty + 1)}
+                          aria-label="Aumentar"
+                        >
                           +
                         </button>
                       </div>
@@ -532,7 +656,9 @@ export default function CheckoutForm() {
               <div className="checkout__summary">
                 <div className="checkout__summary-row">
                   <span>Costo de envío</span>
-                  <span>{cartSyncing || shippingLoading ? '...' : shippingCost !== null ? formatPrice(shippingCost) : '$0'}</span>
+                  <span>
+                    {cartSyncing || shippingLoading ? '...' : shippingCost !== null ? formatPrice(shippingCost) : '$0'}
+                  </span>
                 </div>
 
                 <div className="checkout__summary-row">

@@ -1,134 +1,209 @@
 export const TERMS_AND_CONDITIONS_HTML = `
-<h2>PRIMERA. DEFINICIONES</h2>
+  <p>Los presentes términos y condiciones regulan la participación en la campaña “Cómprale a Córdoba”, iniciativa orientada a contribuir a la reactivación económica de los comerciantes del departamento de Córdoba, afectados por la ola invernal.</p>
 
-<p><strong>USUARIO(S):</strong> Entiéndase para todos los efectos, que el USUARIO es la persona natural o jurídica quien puede actuar como: <strong>REMITENTE</strong>, el cual es la persona que utiliza el servicio postal de mensajería expresa y/o carga, con el fin de enviar objeto o mercancías a un destinatario local, nacional o internacional. Así mismo se entenderá como usuario el <strong>DESTINATARIO</strong>, quien es la persona a quien se dirige por parte del remitente, un envío.</p>
-<p>Los anteriores junto con <strong>INTER RAPIDÍSIMO</strong>, se entenderán como las partes.</p>
+<p>En desarrollo de esta campaña, INTER RAPIDÍSIMO S.A., pondrá a disposición de los comerciantes participantes, a título de apoyo y sin costo, los servicios de Marketplace (uso de plataformas digitales), servicios logísticos (gestión y transporte de envíos) y pasarela de pagos, con el fin de facilitar la comercialización y adquisición de productos por parte de compradores interesados en apoyar el proceso de recuperación económica de la región.</p>
 
-<p><strong>SERVICIOS POSTALES:</strong> Los Servicios Postales consisten en el desarrollo de las actividades de recepción, clasificación, transporte y entrega de objetos postales a través de redes postales, dentro del país o para envío hacia otros países o recepción desde el exterior. Son servicios postales, entre otros, los servicios de correo, los servicios postales de pago y los servicios de mensajería expresa, lo anterior de conformidad a lo dispuesto en la Ley 1369 de 2009.</p>
+<p>La campaña tendrá una vigencia de tres (3) meses, contados a partir de su lanzamiento, periodo durante el cual los comerciantes vinculados podrán acceder a los beneficios aquí descritos.</p>
 
-<p><strong>SERVICIO DE CARGA TERRESTRE:</strong> Servicio por medio del cual INTER RAPIDÍSIMO, se obliga para con el remitente, a cambio de un precio, a conducir de un lugar a otro, por determinado medio y en el plazo fijado, mercancías superiores a 5.1 kilogramos y entregarlas al destinatario.</p>
+<p>Este documento describe los términos y condiciones generales y las políticas de tratamiento de datos aplicables al acceso y uso de los servicios ofrecidos por INTER RAPIDÍSIMO S.A., NIT 800.251.569-7, a través de su campaña “Cómprale a Córdoba”, por medio del portal de su propiedad, así como a través de otros dominios (urls) relacionados y/o otro medio digital (APP).</p>
 
-<p><strong>RECOGIDA O RECOLECCIÓN A DOMICILIO.</strong> Servicio mediante el cual INTER RAPIDÍSIMO, genera la admisión de un envío de mensajería y/o carga en el domicilio o lugar indicado por el remitente.</p>
+<p>Cualquier persona que desee acceder, suscribirse y/o usar el sitio o los servicios de Cómprale a Córdoba podrá hacerlo sujetándose y aceptando los Términos y Condiciones Generales y las Políticas de Privacidad, junto con todas las demás políticas que rigen el portal y que son incorporados a los presentes términos y condiciones, directamente o explicados y/o detallados en otras secciones del sitio web. En consecuencia, todas las visitas y todos los contratos y transacciones que se realicen en este sitio, así como sus efectos jurídicos, quedarán regidos por los presentes términos y condiciones y sometidos a la legislación aplicable en Colombia.</p>
 
-<p><strong>GUÍA O REMESA TIPO VOUCHER:</strong> Es una tirilla de papel que hace las veces de Guía o Remesa y cuya impresión se genera por medio de dispositivos portátiles, esta se genera una vez se ejecute la recogida.</p>
+<p>Cualquier persona que no acate los términos y condiciones y la política de tratamiento de datos anexa, los cuales son de obligatorio cumplimiento y tiene fuerza y carácter vinculante, no podrá utilizar, acceder, registrarse, o realizar cualquier acto de comercio a través de “Cómprale a Córdoba”.</p>
 
-<p><strong>GUIA O REMESA ELECTRÓNICA:</strong> Documento Digital que hace las veces de guía o remesa en copia para el remitente y la cual podrá ser remitida por medios de información digital, esta se genera una vez se ejecute la recogida.</p>
+<h2>DEFINICIONES</h2>
 
-<p><strong>MEDIOS DE INFORMACIÓN DIGITAL.</strong> Son medios de información digital de cara a los presente términos y condiciones, los aplicativos por los cuales el usuario puede recibir confirmaciones de la recogida y /o admisión tales como SMS, aplicativos de mensajería instantánea o correo electrónico.</p>
+<p><strong>CÓMPRALE A CÓRDOBA.</strong> Campaña realizada por INTER RAPIDÍSIMO S.A., para apoyar al comercio afectado por la emergencia derivada de las inundaciones acaecidas en el departamento de Córdoba.</p>
 
-<p><strong>FLETE:</strong> Es el valor del transporte del objeto postal según las tarifas definidas y publicadas por INTER RAPIDÍSIMO.</p>
+<p><strong>SITIO WEB.</strong> Corresponde al dominio de internet donde se desarrollan las actividades correspondientes a la campaña “Cómprale a Córdoba”.</p>
 
-<p><strong>SOBREFLETE:</strong> Valor adicional al flete, con el fin de garantizar el amparo de daños, perjuicios y lucro cesante hasta un máximo del ciento por ciento (100%) del valor comercial declarado.</p>
+<p><strong>CLIENTE.</strong> Persona natural o jurídica que efectúa la compra a través del portal.</p>
 
-<p><strong>VALOR COMERCIAL O DECLARADO:</strong> Es el valor que declara el remitente, tiene su envío en el comercio y el cual se tomará como base para generar las solicitudes de indemnización.</p>
+<p><strong>VENDEDOR O SELLER.</strong> Persona Natural o Jurídica que comercializa sus productos o servicios a través del portal “Cómprale a Córdoba”, facturando de manera directa al consumidor.</p>
 
-<p><strong>VALOR TOTAL DEL SERVICIO:</strong> Es la suma equivalente al valor del flete mas el valor del sobre flete y otros conceptos, el cual tiene como resultado, la tarifa a pagar por parte del usuario.</p>
+<p><strong>PROVEEDOR.</strong> Fabricante o marca aliada de Cómprale a Córdoba que pone a su disposición un inventario de productos o servicios para comercializar y facturar por parte de INTER RAPIDISIMO S.A., NIT 800.251.569-7.</p>
 
-<p><strong>VALOR DEL SERVICIO.</strong> Es el valor dispuesto por INTER RAPIDÍSIMO, para el servicio de recolección a domicilio, el cual será liquidado de manera independiente al valor total del servicio de transporte y deberá ser pagado por parte del remitente al momento de la admisión del envío.</p>
+<h2>OBJETO</h2>
 
-<p><strong>PRE GUÍA / PRE REMESA.</strong> Documento emitido por INTER RAPIDÍSIMO, a través del aplicativo web en donde se encuentra la información diligenciada por el cliente para el transporte.</p>
+<p>Mediante Cómprale a Córdoba se desarrolla la comercialización de los productos de diferentes vendedores/Sellers ubicados en el departamento de Córdoba, productos que podrán ser adquiridos por el comprador de manera electrónica y recibirlos mediante los distintos medios que dispone el portal “Cómprale a Córdoba”.</p>
 
-<p><strong>OBJETOS PROHIBIDOS:</strong> Se consideran objetos de prohibida circulación aquéllos que se encuentran prohibidos en la ley y cuya circulación no se permita por motivos de seguridad, sanidad pública, utilidad general y de protección a los servicios postales.</p>
+<p>La relación contractual que se establece en las presentes condiciones es equiparable a la compraventa y por ende se regirá por las disposiciones legales que rigen la materia, como las de protección al consumidor (ley 1480 de 2011).</p>
 
-<p><strong>SARLAFT. – SISTEMA DE ADMINISTRACIÓN DEL RIESGO DE LAVADO DE ACTIVOS Y FINANCIACIÓN DEL TERRORISMO.</strong> Implementado por Inter Rapidísimo.</p>
+<h2>REGISTRO EN EL PORTAL COMPRALE A CÓRDOBA</h2>
 
-<h2>SEGUNDA. OBJETO</h2>
-<p>Los términos y condiciones aquí contemplados describen el servicio de envíos en línea, el cual es inherente a los de transporte de mensajería expresa y carga que oferta INTER RAPIDÍSIMO.</p>
-<p>Este servicio consiste en que el usuario podrá solicitar en línea la recolección a domicilio de piezas postales y/o de carga, el cual aplicará en los lugares determinados por INTER RAPIDÍSIMO, según su matriz logística y la disponibilidad.</p>
+<p>Para acceder a los productos ofertados por el portal “Cómprale a Córdoba”, es obligatorio diligenciar la información solicitada a través del botón “quiero ayudar”. Allí el usuario comprador deberá registrar datos personales básicos como lo son el nombre y apellido, dirección de correo electrónico de uso personal, tipo y número de documento de identidad, teléfono, ciudad,; el cliente garantiza y responde, en cualquier caso, por la exactitud, veracidad, vigencia y autenticidad de los datos personales ingresados.</p>
 
-<h2>TERCERA. GENERACIÓN DEL ENVÍO EN LÍNEA</h2>
-<p>El usuario remitente que desee el servicio de recolección a domicilio podrá solicitarlo mediante la página web de INTER RAPIDÍSIMO, (http://www.interrapidisimo.com), y demás mecanismos que determine la Compañía.</p>
-<p>El usuario deberá diligenciar un formulario web, en el cual se identificará con su número de documento de identidad y número de celular. Allí ingresará la información correspondiente del remitente y destinatario, los lugares de origen y destino y las características del envío, es importante que la información sea real y verídica por cuanto será la consignada en la guía de transporte y/o remesa de Carga, según corresponda el tipo de servicio a contratar.</p>
-<p>Una vez diligenciada la información y escogido el servicio a prestar, se generará una pre-liquidación del costo de servicio de mensajería expresa y/o carga, una vez aceptado el mismo por parte del cliente, se emitirá un número de identificación que amparará la solicitud de recogida y posteriormente una vez ejecutado el servicio, al objeto a transportar. Este número de identificación, deberá ser plasmado por parte del usuario, en un lugar visible del envío, para ello, podrá también imprimir el Rótulo que emite el aplicativo web y adherirlo al mismo.</p>
-<p>El usuario debe tener en cuenta que solo podrá hacer una solicitud de recogida, por cada envío que requiera transporte.</p>
+<p>Si se verificará o sospechará un uso fraudulento y/o malintencionado y/o contrario a estos Términos y Condiciones y/o contrarios a la buena fe, Cómprale a Córdoba tendrá el derecho inapelable de dar de baja la solicitud de compra y/o de iniciar las acciones judiciales que sean pertinentes.</p>
 
-<h2>CUARTA. ALISTAMIENTO DEL ENVÍO PREVIO AL PROCESO DE RECOGIDA</h2>
-<p>El usuario remitente se obliga a tener a disposición de INTER RAPIDÍSIMO, el envío a transportar, para ello se obliga además a disponer de un embalaje adecuado que evite cualquier daño del envío o de cualquier otra mercancía transportada por INTER RAPIDÍSIMO, el envío deberá contar con un rótulo, documento que identifique como mínimo los datos de remitente y destinatario (nombre e identificación), y las direcciones de origen y destino incluyendo la ciudad, además deberá garantizar que en el envío se identifique el número de pre-guía o pre-remesa emitido por el aplicativo web.</p>
+<p>Cómprale a Córdoba se reserva el derecho de solicitar algún comprobante y/o dato adicional a efectos de corroborar los datos personales, así como de suspender temporal o definitivamente a aquellos clientes cuyos datos y/o identidad no hayan podido ser confirmados.</p>
 
-<h2>QUINTA. PROCESO DE RECOLECCIÓN A DOMICILIO</h2>
-<p>Una vez solicitada la recolección a través del servicio de envíos en línea, un colaborador de INTER RAPIDÍSIMO, en los tiempos indicados en la solicitud, se dirigirá al lugar indicado para hacer la recolección física del envío, una vez allí este validará las características de la pieza a transportar, y en el evento que no exista inconsistencia procederá a confirmar el servicio a través de un aplicativo móvil o cualquier otro medio definido, como constancia de esto emitirá una guía tipo voucher en donde se indiquen los datos del envío y la entregará al remitente, y/o emitirá una guía electrónica la cual será enviada por medios digitales tales como vía SMS, por aplicaciones de mensajería instantánea o correo electrónico conforme a los datos consignados en la solicitud.</p>
+<p>Se encuentra prohibido generar la creación de cuentas de usuario cuyo dominio se encuentre vinculado a un correo corporativo, incluso los correspondientes a Inter Rapidísimo S.A. Esta situación generara la inactivación automática de la cuenta. En estos casos de inhabilitación, “Cómprale a Córdoba”, podrá cancelar la compra efectuada, sin que ello genere derecho alguno a resarcimiento, pago y/o indemnización a favor del cliente.</p>
 
-<p><strong>PARÁGRAFO PRIMERO:</strong> La guía o remesa, emitida por medio digital obedece a la copia del remitente (prueba de admisión).</p>
+<h2>FORMACIÓN DEL CONSENTIMIENTO DE COMPRA</h2>
 
-<p><strong>PARÁGRAFO SEGUNDO:</strong> En el evento que las características (condiciones volumétricas, peso, contenido, destino y demás) sean distintas a las consignadas en la solicitud de recolección, en el momento de la admisión el colaborador procederá a modificarlas en el sistema y presentará al usuario la nueva liquidación del servicio de transporte, si el usuario acepta estas condiciones se procederá conforme a esta cláusula, de lo contrario se cancelará el servicio.</p>
+<p>El consentimiento por parte del cliente se manifiesta con la realización y aceptación de cada uno de los pasos de compra realizados a través del portal Cómprale a Córdoba y se perfecciona con la manifestación final de la compra después de haber revisado el resumen del pedido en el cual se encuentra cada uno de los productos o servicios, su precio individual y la sumatoria total que debe cancelar. Lo anterior con el fin que el cliente pueda verificar todos los detalles del pedido y las demás condiciones del contrato a efectos que él mismo confirme o realice las correcciones necesarias antes de la confirmación de la compra.</p>
 
-<h2>SEXTA. CONTINUIDAD DE LOS SERVICIOS DE MENSAJERÍA O DE CARGA</h2>
-<p>A partir de la ejecución efectiva de la recolección a domicilio, entendiéndose este como la admisión y custodia por parte de un colaborador de INTER RAPIDÍSIMO del envío de mensajería expresa o Carga, aplicarán las condiciones de la prestación de servicio dispuestas en los contratos de mensajería expresa o de transporte de cosas -según el servicio solicitado por el usuario- los cuales se encuentran publicados en los puntos de atención al usuario y/o en la página web (https://www.interrapidisimo.com/contratos-mensajeria-carga-y-giros).</p>
-<p><strong>PARÁGRAFO:</strong> El usuario que solicite el servicio de transporte manifiesta, conocer los contratos de prestación de los servicios de mensajería expresa y de cargar, por lo que declara conocer las condiciones de los servicios, y se abstendrá de realizar una solicitud de envío en línea si desconoce los mismos.</p>
+<p>De igual forma, el portal previo a la aceptación pago exigirá la aceptación de los presentes términos y condiciones, así como la autorización de tratamiento de sus datos personales con las finalidades descritas en la Política de Tratamiento de Datos Personales.</p>
 
-<h2>SÉPTIMA. PRECIO DEL SERVICIO</h2>
-<p>El servicio de envíos en línea para la recolección a domicilio, se presta a cambio de un precio en dinero que se fijará de acuerdo con las tarifas informadas por INTER RAPIDÍSIMO en el momento de generar la solicitud por parte del usuario. Entendiéndose que al confirmar el envío en línea acepta las tarifas y costos asociados.</p>
-<p><strong>PARÁGRAFO PRIMERO:</strong> El valor del servicio de envío en línea para la recolección a domicilio, es adicional al establecido para los servicios de mensajería y/o carga, estos últimos se regirán por las tarifas publicadas por INTER RAPIDÍSIMO y los cuales se informarán al cliente en el momento de la admisión del envío.</p>
-<p><strong>PARÁGRAFO SEGUNDO:</strong> El presente servicio por ser un servicio inherente o en sí mismo de transporte no está sujeto al impuesto al valor agregado – IVA.</p>
+<h2>PRECIO</h2>
 
-<h2>OCTAVA. FORMA DE PAGO</h2>
-<p>El servicio de envíos en línea es un servicio exclusivo para el remitente y el pago de este estará a cargo del mismo, quien deberá cancelar la tarifa indicada según las condiciones de la cláusula anterior, al momento de ejecutar la recolección del envío, es decir, cumplido el procedimiento dispuesto en la Cláusula quinta de los presentes términos y condiciones.</p>
-<p><strong>PARÁGRAFO:</strong> El remitente que solicite el servicio en virtud de uno de los convenios celebrados entre INTER RAPIDÍSIMO y clientes corporativos, diligenciará al momento de la solicitud de la misma en el campo establecido, el código de convenio, dicha acción lo exonerará del pago de la tarifa de los servicios según las condiciones establecidas con el tercero para tal fin, dando cumplimiento a los acuerdos particulares. El cliente se abstendrá de remitir por medio de la opción de convenio mercancías no autorizadas por el tercero mediante este mecanismo.</p>
+<p>El precio de los productos o servicios publicados en “Cómprale a Córdoba”, se determina en pesos colombianos y corresponde al valor único de cada producto o servicio, incluyendo gastos de envío.</p>
 
-<h2>NOVENA. PLAZO PARA LA RECOLECCIÓN A DOMICILIO</h2>
-<p>El cliente determinará mediante el aplicativo web o móvil y según la disponibilidad ofrecida por este, la fecha en la cual solicita programar la recogida, obligándose con esto a tener a disposición de INTER RAPIDÍSIMO el envío a transportar perfectamente embalado y rotulado de conformidad con lo dispuesto en los presentes términos y condiciones.</p>
-<p>El plazo para la recogida de un envío variará de conformidad con la matriz logística determinada por INTER RAPIDÍSIMO y según disponibilidad.</p>
-<p>Si durante el término de 24 horas hábiles siguientes a la solicitud de recogida el envío no ha sido admitido por INTER RAPIDÍSIMO, la solicitud de recogida será anulada y el usuario deberá proceder a generar una nueva solicitud, conforme a lo indicado en estos términos y condiciones.</p>
+<p>En el evento de existir algún error en el precio publicado, se procederá con la corrección inmediata, y se informará el valor real del producto o servicio.</p>
 
-<h2>DÉCIMA. OBLIGACIONES DE INTER RAPIDÍSIMO</h2>
-<p>Tendrán las siguientes obligaciones frente a los usuarios:</p>
+<h2>MEDIOS DE PAGO</h2>
+
+<p>Los productos y servicios ofrecidos en “Cómprale a Córdoba”, sólo pueden ser pagados con los medios especificados en el sitio web.</p>
+
+<p>“Cómprale a Córdoba”, podrá indicar determinadas condiciones de compra según el medio de pago que se utilice por el cliente.</p>
+
+<p>Los medios de pago determinados por “Cómprale a Córdoba”, pero sin limitarse a ellos, serán los siguientes:</p>
+
+<p><strong>Pasarela de pago:</strong> Servicio de pago ofertado por un tercero que permite el recaudo del dinero pagado por los clientes de Cómprale a Córdoba de manera segura y por distintos medios (tarjetas débito y crédito).</p>
+
+<p>El uso de pasarelas de pago y de tarjetas de crédito se sujetará a lo establecido en los términos y condiciones del proveedor del servicio o emisor o lo pactado en los respectivos contratos de apertura y reglamento de uso. En caso de contradicción, predominará lo expresado en ese último instrumento.</p>
+
+<h2>DESPACHO DE LOS PRODUCTOS</h2>
+
+<p>Una vez verificado el procedimiento de compra procederá a notificar la compra al Vendedor y este a su vez enviará el producto por intermedio de la red logística de INTER RAPIDÍSIMO S.A. y su entrega se sujetará a la matriz de tiempos y destinos del mencionado transportador.</p>
+
+<p>Para la entrega del producto, Cómprale a Córdoba tomará como dirección de destino la ingresada por el cliente al momento de realizar la compra.</p>
+
+<p>Cuando se genere una orden de compra en la cual se incluya productos de dos o más vendedores, es posible que la entrega de los productos se genere en momentos distintos y no de forma consolidada, de conformidad a los tiempos de alistamiento del vendedor.</p>
+
+<p>El o los productos serán entregados en la dirección registrada por el cliente en la compra, se entenderá autorizada para recibir el producto, toda persona mayor de 12 años que se encuentre en el domicilio del cliente.</p>
+
+<p>En el evento que el lugar de destino se encuentre bajo las normas de propiedad horizontal y no sea posible su ingreso, el envío será dejado en el lugar de recibo de correspondencia del mismo. Situación que desde ya acepta y autoriza el cliente.</p>
+
+<p>El cliente podrá verificar el estado de su pedido, a través del rastreador de envíos ubicado en el portal, ingresando el número de guía correspondiente.</p>
+
+<h2>DERECHO Y PROCEDIMIENTO DE RETRACTO</h2>
+
+<p>Se entenderá como DERECHO DE RETRACTO la facultad que tiene el Cliente de arrepentirse o desistir de una compra realizada a través de “Cómprale a Córdoba” dentro de los cinco (5) días hábiles contados a partir de la fecha de entrega del bien o de la celebración del contrato en caso de la prestación de servicios, término dentro del cual, deberá informar por los canales de comunicación dispuestos (soporte@compraleacordoba.com a la línea 3203504047).</p>
+
+<p>Para poder hacer uso del derecho de retracto es necesario que no se trate de bienes de uso personal, tales como ropa interior, trajes de baño, fajas, medias, accesorios para el cabello, perfumes, cremas (incluyendo productos capilares), cosméticos y joyas y los demás descritos en el anexo 2 - Productos que no tiene devolución. Igualmente, el producto no debe mostrar señales de uso, suciedad o desgaste, estar averiado o deteriorado y contar con la totalidad de accesorios originales con los cuales fue entregado y sus empaques y marquillas.</p>
+
+<p>Si el retracto es procedente, “Cómprale a Córdoba” generará un número de pre-guía de transporte completamente gratis, con la cual el producto será recogido dentro en los (2) días hábiles siguientes por INTER RAPIDISIMO S.A. Una vez se realice la recolección del producto, el cliente deberá conservar el comprobante firmado y sellado. Únicamente se entenderá efectivo el retracto cuando el producto sea DEVUELTO por parte del Cliente y sea efectivamente recibido por el vendedor, en las condiciones ya mencionadas anteriormente y se procederá al reembolso del dinero de conformidad con lo indicado en la sección “CONDICIONES DE REEMBOLSO DE DINERO”.</p>
+
+<h2>PROCEDIMIENTO PARA DEVOLUCIÓN POR CAMBIO</h2>
+
+<p>Para solicitar un cambio por inconformidad con un producto, el cliente deberá remitir su solicitud a través del correo electrónico soporte@compraleacordoba.com, relacionando la orden de pedido, el producto objeto de devolución y el motivo que da origen a la solicitud de devolución. Así mismo deberá, adjuntar tres imágenes que den cuenta del estado del producto.</p>
+
+<p>Una vez finalizado el proceso en Cómprale a Córdoba, enviará un correo electrónico indicando que la solicitud fue recibida con éxito.</p>
+
+<p>Para cualquier cambio por inconformidad con el producto, el cliente tiene hasta cinco (5) días hábiles contados a partir de la entrega del producto para presentar la solicitud.</p>
+
+<p>Por correo electrónico se le indicará al cliente la aceptación o rechazo de su solicitud, si procede se le informará el número de pre-guía para que realice el envío al vendedor del producto a cambiar, el cual será recogido dentro en los (2) días hábiles siguientes por INTER RAPIDISIMO S.A. Dicho envío no tendrá ningún costo.</p>
+
+<h2>CONDICIONES GENERALES PARA CAMBIOS</h2>
+
 <ul>
-  <li>Tener a disposición de los usuarios el aplicativo de envíos en línea en su página web u otros mecanismos que determine.</li>
-  <li>Garantizar que el servicio de recogidas se generará con fundamento en lo aquí descrito.</li>
-  <li>Suministrar información precisa y actualizada acerca de los servicios que presta y, en particular, de las condiciones de acceso, tarifas, cobertura, frecuencia, tiempo de entrega del objeto postal y/o de carga, niveles de calidad, y procedimiento para la atención y trámite de las PQRS y las solicitudes de indemnización.</li>
-  <li>Establecer, de manera clara, simple y gratuita, los procedimientos internos para el trámite de las PQRs.</li>
-  <li>Prestar el Servicio sin discriminación alguna entre los usuarios que se encuentren en condiciones análogas y conformidad la matriz logística determinada.</li>
-  <li>Prestar el servicio bajo el cumplimiento de las condiciones ofrecidas y las características inherentes o propias de cada servicio.</li>
+  <li>No debe estar averiado o deteriorado.</li>
+  <li>Debe tener etiquetas, factura de venta, accesorios y empaques originales (incluyendo manuales, guías de uso, certificados de garantía, etc.).</li>
+  <li>No debe mostrar señales de uso, suciedad o desgaste.</li>
+  <li>No debe ser perecedero, de uso personal o íntimo (ropa interior, trajes de baño, fajas, medias, accesorios para el cabello, perfumes, cremas (incluyendo productos capilares), cosméticos y joyas, entre otros).</li>
+  <li>No procederá el cambio en el evento de que el cliente no realice la devolución física del producto dentro de los 10 días calendario siguientes al recibido.</li>
 </ul>
 
-<h2>DÉCIMA PRIMERA. OBLIGACIONES DE LOS USUARIOS</h2>
-<p>Son obligaciones de los usuarios, las siguientes:</p>
+<p>En caso de ser procedente, pero que por cualquier motivo no se pueda realizar el cambio del producto por uno igual o de similares características, Cómprale a Córdoba realizará la entrega de un bono o cupón por el valor de los productos sobre los cuales se solicitó la devolución, el cual será enviado al correo electrónico registrado, a más tardar en un plazo de seis (6) días hábiles y podrá ser utilizado desde ese momento y hasta los seis (6) meses siguientes a su recepción o se realizará el reembolso del dinero a elección del cliente de conformidad con lo indicado en la sección “CONDICIONES DE REEMBOLSO DE DINERO”.</p>
+
+<h2>REVERSIÓN DE PAGO</h2>
+
+<p>El Cliente podrá solicitar que se reverse el pago de un producto comprado en “Cómprale a Córdoba”, en los siguientes eventos: i) Cuando la operación o el pago haya sido una operación de fraude o cuando corresponda a una operación no solicitada por el Cliente; ii) Cuando el producto adquirido no sea recibido, o el producto entregado no corresponda a lo solicitado o sea defectuoso.</p>
+
+<p>Para solicitar la reversión del pago, el Cliente deberá notificarlo al correo electrónico soporte@compraleacordoba.com, así como al emisor del instrumento de pago, inmediatamente o dentro de los cinco (5) días hábiles siguientes a:</p>
+
 <ul>
-  <li>Cumplir cabalmente los compromisos contractuales adquiridos.</li>
-  <li>Verificar con INTER RAPIDÍSIMO, previa generación del envío en línea, si la pieza a enviar requiere de un embalaje especial.</li>
-  <li>Identificarse ante INTER RAPIDÍSIMO, con su tarjeta de identidad, cédula de ciudadanía, cédula de extranjería o pasaporte como requisito previo a la admisión.</li>
-  <li>Pagar la tarifa del servicio contratado al momento de la recolección del envío.</li>
-  <li>Abstenerse de enviar objetos prohibidos o peligrosos, de acuerdo con las normas vigentes.</li>
-  <li>Abstenerse de generar envíos en nombre de terceros sin autorización.</li>
-  <li>Suministrar al momento de la adquisición del servicio, el nombre y la dirección del destinatario, el lugar de la entrega, la naturaleza, el valor, el número, el peso, el volumen y las características del envío.</li>
-  <li>Validar al momento de la admisión del envío que los datos registrados en la guía de transporte/remesa, sean correctos.</li>
+  <li>La fecha en que tuvo noticia de una operación fraudulenta o no solicitada;</li>
+  <li>La fecha en que debió haber recibido un producto y no lo recibió por causa imputable al transportador INTER RAPIDISIMO S.A.;</li>
+  <li>La fecha en que recibió defectuoso un producto o sin que correspondiera a lo solicitado.</li>
 </ul>
 
-<h2>DÉCIMA SEGUNDA. TRÁMITE DE PQR Y SOLICITUDES DE INDENNIZACIÓN</h2>
-<p>Los USUARIOS podrán interponer una petición, queja o recurso o solicitudes de indemnización de la siguiente manera:</p>
+<p>En el último caso el Cliente deberá realizar la devolución del producto de acuerdo al procedimiento establecido cambio o devoluciones.</p>
+
+<p>La notificación de las situaciones descritas anteriormente ante Cómprale a Córdoba no exime al cliente de la responsabilidad que tiene de notificar la reclamación al emisor del instrumento de pago electrónico utilizado para realizar la compra.</p>
+
+<p>Cuando el pago corresponda a varios productos, el Cliente podrá solicitar la reversión parcial del pago de aquellos respecto de los cuales realiza la solicitud, el Cliente en este caso deberá expresar de manera clara cuál es el producto y el valor por el cual solicita la reversión.</p>
+
+<p>Una vez notificado a Cómprale a Córdoba y hecha la solicitud de reversión ante el emisor del instrumento de pago por parte del cliente, estos contarán con el término de ley para analizar el caso y dar respuesta de la reversión.</p>
+
+<h2>CONDICIONES DE REEMBOLSO DE DINERO</h2>
+
+<p>Si el producto a devolver fue pagado con tarjeta débito se reembolsará la totalidad del dinero pagado mediante transferencia bancaria a la misma cuenta de la que se debitó o reversión si aplicare; si el pago se realizó con tarjeta de crédito se solicitará la devolución al emisor de la tarjeta para que el Cliente reciba ese dinero descontado en su extracto y si el pago se realizó CONTRAPAGO el Cliente deberá informar la cuenta bancaria a la cual se le podrá realizar el reembolso del dinero.</p>
+
+<p>En el evento en que el Cliente no posea una cuenta bancaria, Cómprale a Córdoba realizará el reembolso del dinero a través de las agencias de INTER RAPIDISIMO S.A., siempre y cuando el valor no supere la suma de DOSCIENTOS MIL PESOS MCTE (200.000). Si llegare a superar dicho valor, el cliente deberá abrir una cuenta, o autorizar mediante carta formal la consignación en la cuenta de un tercero, anexando copia de la cédula y los datos de ubicación dirección y teléfono del cliente y del autorizado.</p>
+
+<p>La devolución del dinero se realizará dentro de los quince (15) días calendario siguiente a la fecha en que Cómprale a Córdoba reciba los productos devueltos en las mismas condiciones en las que se entregaron al Cliente. Cómprale a Córdoba verificará que el derecho de retracto se ejerció conforme a la ley y los presentes términos y condiciones, para que el mismo sea aceptado.</p>
+
+<p>Respecto a los pagos realizados mediante tarjetas de crédito, el término de devolución será el establecido por el emisor de la tarjeta para la reversión de pagos, conforme a las disposiciones legales, para el caso de pago por débito será el término que tome el banco de origen al banco de destino.</p>
+
+<h2>GARANTÍA</h2>
+
+<p>Los productos o servicios que se comercializan a través de Cómprale a Córdoba tendrán la garantía anunciada por el vendedor o fabricante, por lo que su concesión o negación estará sujeta a las condiciones entregadas, certificadas y/o publicadas por estos. Por lo tanto, el cliente deberá acudir directamente al vendedor o fabricante informado en el momento de la compra, para lo cual Cómprale a Córdoba proporcionará los datos del vendedor o fabricante para que éste le brinde un soporte adecuado a su solicitud de garantía.</p>
+
+<p>La garantía no aplica en los casos previstos en las condiciones entregadas, certificadas y/o publicadas por el vendedor o fabricante y además en los siguientes casos, pero sin limitarse a ellos:</p>
+
 <ul>
-  <li><strong>Medios de Presentación:</strong> Por medio de carta enviada a la Calle 18 No. 65a 03 en Bogotá u oficinas autorizadas de todo el país; a través de la línea telefónica 3232554455, de manera verbal; por medio de la página web: www.interrapidisimo.com, diligenciando el formato que se encuentra disponible para tal efecto.</li>
-  <li><strong>Solicitud de indemnización:</strong> Esta solo procederá en caso de que el envío haya sido entregado físicamente y efectivamente admitido por INTER RAPIDÍSIMO. La simple generación del envío en línea, entiéndase como la generación de una pre-guía o pre-remesa no servirán para acreditar una solicitud de indemnización, ya que solamente hasta el momento en que INTER RAPIDÍSIMO reciba físicamente el envío podrá responder por el mismo.</li>
-  <li><strong>Contenido De La Pqr’s:</strong> Para atender la solicitud de una manera idónea deberá consignar como mínimo: Nombre e identificación del Usuario, Número de Guía, fecha de imposición del envío nombre los hechos en que se fundamenta su solicitud, dirección física y de correo electrónico, así mismo deberá anexar si es el caso copia del documento de identificación, copia simple y legible de la guía que amparo el envío.</li>
-  <li><strong>Término para Interponer Solicitudes de indemnización.</strong> El término para presentar una solicitud Por pérdida, expoliación o avería, será: a) Por parte del remitente, dentro de los 10 días calendario siguientes a la admisión del objeto postal, cuando se trate de servicios nacionales y 6 meses cuando se trate de servicios internacionales. b) Por parte del destinatario deberá ser presentado dentro de los cinco (5) días hábiles siguientes al recibo del objeto postal.</li>
-  <li><strong>Decisión:</strong> Una vez se ha recibido la PQR o la solicitud de indemnización, INTER RAPIDÍSIMO generará la respuesta dentro de los 15 días hábiles siguientes.</li>
-  <li><strong>Notificación.</strong> INTER RAPIDÍSIMO, remitirá la respuesta a la PQR o solicitud de indemnización por correo electrónico y/o físico, teniendo en cuenta en todo caso, el medio utilizado por el USUARIO para la radicación de la solicitud.</li>
+  <li>El equipo presente maltrato, accidente, catástrofes naturales o como consecuencias de estas, uso distinto al indicado en las instrucciones de manejo (ejemplo: comercial) uso en condiciones ambientales deficientes, instalación y/o programación deficiente del producto.</li>
+  <li>Presente daños causados por fluctuaciones de voltaje de la energía eléctrica o descargas eléctricas atmosféricas.</li>
+  <li>El producto haya sido abierto o manipulado por personal no autorizado por la marca.</li>
+  <li>Son daños ocasionados por la adaptación e instalación de piezas o accesorios no genuinos, no autorizados por la marca.</li>
+  <li>Son daños ocasionados por insectos o roedores.</li>
+  <li>Son daños ocasionados por la falta de cuidado con el producto o factores ajenos (oxidación, decoloración, ralladuras, exceso de polvo, golpes ruptura de mueble o gabinete exterior).</li>
+  <li>El producto no presente número de serie de la fabricación o este se encuentre alterado.</li>
+  <li>El equipo se somete a sobre saturación ejemplo: (alquiler de lavadoras).</li>
+  <li>Si el producto es intervenido o manipulado por un tercero o un técnico no autorizado esto será causal de perdida de la garantía del producto.</li>
+  <li>Sea requerida fuera del territorio nacional donde fue adquirido el producto.</li>
+  <li>El sello de garantía esté roto.</li>
 </ul>
 
-<p><strong>Recursos.</strong> De conformidad a lo dispuesto en la normatividad vigente el usuario en caso de inconformidad con la respuesta emitida por INTER RAPIDÍSIMO, podrá interponer los recursos de reposición y en subsidio el de apelación de la siguiente manera: (Solo aplicable a servicios de mensajería expresa)</p>
-<ul>
-  <li><strong>Recurso de reposición:</strong> Se interpone dentro de los diez (10) días hábiles siguientes a la fecha en que se surta la notificación de la decisión al usuario, ante INTER RAPIDÍSIMO.</li>
-  <li><strong>Recurso De Apelación:</strong> Se debe interponer en subsidio del recurso de reposición al momento de la presentación del mismo. En caso de que la respuesta de INTER RAPIDÍSIMO, al recurso de reposición sea desfavorable a las pretensiones del usuario el operador postal remitirá copia de toda la actuación a la Superintendencia de Industria y Comercio, entidad que resolverá de manera definitiva la solicitud.</li>
-</ul>
+<p>El término de la garantía empezará a correr a partir de la entrega del producto al cliente/consumidor, hecho por el cual para su exigencia el cliente deberá interponer la debida reclamación ante el vendedor o fabricante, por los canales que estos determinen.</p>
 
-<h2>DÉCIMA TERCERA. MECANISMO DE RESOLUCIÓN DE CONFLICTOS</h2>
-<p>Los usuarios, podrán acceder a la herramienta SIC facilita http://sicfacilita.sic.gov.co/SICFacilita, la cual es una herramienta virtual en donde la Superintendencia de Industria y Comercio – SIC actúa como facilitadora para que consumidores y proveedores alcancen acuerdos sobre reclamaciones relacionados con derechos del consumidor y a la cual se encuentra vinculada INTER RAPIDÍSIMO.</p>
+<h2>PROPIEDAD INTELECTUAL</h2>
 
-<h2>DÉCIMA CUARTA. AUTORIZACIONES</h2>
-<p>Los usuarios autorizan expresamente a INTER RAPIDÍSIMO, al momento de la adquisición y uso del servicio, como conducta inequívoca, al tratamiento de sus datos personales y consulta y/o reporte ante centrales de riesgo, su comportamiento financiero de conformidad con la ley 1581 de 2012, decreto 1377 de 2013, ley de habeas data1266 de 2008 y concordantes, así como la aceptación de grabar las llamadas y recibir mensajes de texto entre USUARIOS e INTER RAPIDÍSIMO para efectos de seguimiento de la calidad del servicio al cliente y con fines probatorios.</p>
-<p>Así mismo, autorizan a INTER RAPIDÍSIMO la consulta en listas restrictivas con base en el Sistema de Administración de Riesgo de Lavado de Activos y Financiación del Terrorismo debidamente implementado por INTER RAPIDÍSIMO.</p>
+<p>Todo el contenido incluido o puesto a disposición del cliente en Cómprale a Córdoba, incluyendo textos, gráficas, logos, íconos, imágenes, archivos de audio, descargas digitales y cualquier otra información es propiedad de Cómprale a Córdoba. O su uso ha sido autorizado por las empresas proveedoras. La compilación del Contenido es propiedad exclusiva de INTERRAPIDISIMO S.A., y en tal sentido, el cliente debe abstenerse de extraer y/o reutilizar partes del Contenido sin consentimiento previo y expreso.</p>
 
-<h2>DÉCIMA QUINTA. NOTIFICACIONES</h2>
-<p>Para todos los efectos de peticiones, quejas, reclamos que deriven del presente servicio, los lugares de notificación, serán los siguientes:</p>
-<p><strong>INTER RAPIDÍSIMO</strong>, podrá ser notificado en la Calle 18 No. 65a 03 de la ciudad de Bogotá D.C., o a través de los canales dispuestos en este documento.</p>
-<p>Por su parte los usuarios, autorizan que su lugar de domicilio sea el registrado en el campo de dirección al momento de la adquisición del servicio y podrán ser notificados mediante mensajes de datos, tales como mensajes de texto, correo electrónico y/o comunicaciones escritas al teléfono y dirección registrados en la guía de transporte y/o los manifestados en sus comunicaciones a la Compañía de manera verbal o escrita.</p>
+<h2>RESPONSABILIDAD</h2>
 
-<h2>DÉCIMA SEXTA. NORMAS APLICABLES AL SERVICIO</h2>
-<p>Los presentes términos y condiciones se rigen por las leyes Colombianas y la aplicación de las mismas se dará conforme al servicio contratado por el usuario remitente (mensajería expresa y/o Carga) según lo contemplado en los contratos correspondientes.</p>
+<p>Cómprale a Córdoba es una campaña de propiedad de INTER RAPIDISIMO S.A., sociedad legalmente constituida, identificada con el Nit No 800.251.569-7, quién es el garante de los términos y condiciones aquí expuestas en su calidad exclusiva de proveedor de servicios de Comercio electrónico. Su responsabilidad será limitada hasta donde comienza la del vendedor del producto o fabricante o prestador del servicio.</p>
 
-<h2>DÉCIMA SÉPTIMA. ACEPTACIÓN</h2>
-<p>Los usuarios declaran conocer el contenido de lo aquí pactado, lo cual surte efectos jurídicos con el simple acuerdo de voluntades al momento de la aceptación de la prestación del servicio y la expedición de la pre-guía o pre-remesa de transporte. Los presentes términos y condiciones prevalecerán en cualquier caso y dejan sin efecto cualquier disposición o publicidad que los contraríen.</p>
+<p>Dada la naturaleza de la Internet, Cómprale a Córdoba no puede garantizar la disponibilidad del acceso a su página y/o APP, ni que las transacciones no puedan ser interrumpidas en cualquier momento. En el mismo sentido, el acceso del cliente a la Cuenta puede ser ocasionalmente restringido o suspendido con el objeto de efectuar reparaciones, mantenimiento o introducir nuevos Servicios. Por lo tanto, Cómprale a Córdoba no será responsable por lucro cesante o pérdidas de oportunidades comerciales; o por cualquier daño indirecto derivado de las situaciones expuestas.</p>
 
-<h2>DÉCIMA OCTAVA. FECHA DE CELEBRACIÓN</h2>
-<p>Los presentes términos y condiciones se aplicarán en la fecha en que se realice una solicitud mediante el servicio de envíos en línea dispuesto por INTER RAPIDÍSIMO, de conformidad con la información consagrada en la pre-guía o pre-remasa. Aceptan expresa o tácitamente las partes.</p>
+<h2>LEY APLICABLE</h2>
+
+<p>La relación contractual que se establece en las presentes condiciones es equiparable a la de la compraventa y por ende se regirá por las disposiciones legales que rigen la materia, como las de protección al consumidor (ley 1480 de 2011).</p>
+
+<p>La presente relación contractual le serán aplicables las normas postales (ley 1369 de 2009 y 3038 de 2011) y toda vez que el transporte se genera bajo la figura de la auto prestación consagrada en el numeral 11 del artículo 3 de la ley 1369 del 2009 por parte de la empresa INTER RAPIDISIMO S.A., NIT No. 800.251.569-7., y lo correspondiente al código de comercio título VIII.</p>
+
+<h2>AUTORIZACIONES</h2>
+
+<p>Con el uso y/o registro en Cómprale a Córdoba los clientes autorizan expresamente INTER RAPIDISIMO S.A., NIT 800.251.569-7 al tratamiento de sus datos personales según ley 1581 de 2012, decreto 1377 de 2013, ley de habeas data 1266 de 2008 así mismo se somete a la Política de Tratamiento De Datos Personales, publicada en el portal y la cual se puede consultar en el presente link. https://www.interrapidisimo.com/proteccion-y-privacidadde-datos-personales</p>
+
+<p>El cliente autoriza a recibir llamadas y a que le sean enviados mensajes vía correo electrónico y/o mensaje de texto y/o WhatsApp y/o cualquier plataforma de mensajería instantánea, a los datos de contacto registrados en el sitio web, a fin de comunicarle información sobre su compra, promociones o publicidad vigente. El cliente podrá solicitar la actualización, rectificación y/o supresión de sus datos personales a través del correo electrónico tratamiento.datospersonales@interrapidisimo.com.</p>
+
+<h2>CONTACTO</h2>
+
+<p>El área de Servicio al Cliente atenderá las peticiones, quejas, reclamos y consultas de los clientes a través de los siguientes medios.</p>
+
+<p><strong>Líneas:</strong> 323 255 44 55</p>
+
+<p><strong>Dirección:</strong> Calle 18 65 a 03 Bogotá</p>
+
+<p><strong>Para ventas, post ventas, pedidos, temas comerciales:</strong></p>
+
+<p><strong>Líneas:</strong> 320-3504047</p>
+
+<p><strong>Correo:</strong> soporte@compraleacordoba.com</p>
+
+<p><strong>Dirección:</strong> Calle 18 65 a 03 Bogotá</p>
+
+<p><strong>Una marca de:</strong></p>
+
+<p><strong>Carrera 13 No. 27 - 00, Pisos. 1 y 3</strong></p>
+
+<p><strong>Teléfono:</strong> (1) 592 0400</p>
+
+<p><strong>Línea gratuita Nacional:</strong> 01 8000 910 165</p>
+
+<p><strong>contactenos@sic.gov.co</strong></p>
 `;

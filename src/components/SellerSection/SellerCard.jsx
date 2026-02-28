@@ -32,7 +32,10 @@ function SellerCard({ seller, onViewDetail }) {
 
   const sellerId = seller?.id;
   const sellerName = seller?.name || '';
-  const sellerImage = seller?.image || SELLER_PLACEHOLDER;
+
+  // ✅ prefer logo, fallback to banner, then placeholder
+  const sellerImage = seller?.logo_pic || seller?.banner_pic || SELLER_PLACEHOLDER;
+
   const sellerDescription = stripHtml(seller?.description);
 
   const qProducts = useProductsBySeller({ sellerId, pageSize: 12, currentPage: 1, enabled: true });
@@ -58,10 +61,8 @@ function SellerCard({ seller, onViewDetail }) {
 
   const canScroll = products.length > 0;
 
-  // ✅ if already loaded and there are NO products, don't render this seller
   if (!qProducts.isLoading && products.length === 0) return null;
 
-  // dynamic arrow disabling
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
 
@@ -98,16 +99,14 @@ function SellerCard({ seller, onViewDetail }) {
 
       <div className="seller-card__left">
         <div className="seller-card__image-wrap" onClick={handleSellerNav} role="button" tabIndex={0}>
-          <img className="seller-card__cover" src={sellerImage} alt={`Portada de ${sellerName}`} loading="lazy" />
+          <img className="seller-card__cover" src={sellerImage} alt={`Imagen de ${sellerName}`} loading="lazy" />
           <div className="seller-card__name-overlay">
             <h3 className="seller-card__name">{sellerName}</h3>
           </div>
         </div>
 
         <div className="seller-card__info">
-          {/* ✅ Mobile title (visible only on mobile via CSS) */}
           <h3 className="seller-card__name seller-card__name--mobile">{sellerName}</h3>
-
           <p className="seller-card__description">{sellerDescription}</p>
 
           <button className="seller-card__btn" onClick={onViewDetail} aria-label={`Cómprale aquí a ${sellerName}`} type="button">

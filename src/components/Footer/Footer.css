@@ -22,8 +22,7 @@
   align-items: center;
   justify-content: center;
   gap: 18px;
-
-  padding: 84px 0 84px;
+  padding: 35px 0;
   text-align: center;
 }
 
@@ -36,7 +35,7 @@
 }
 
 .footer__organizer-logo {
-  height: 40px;
+  height: 36px;
   width: auto;
   display: block;
   filter: brightness(0) invert(1);
@@ -46,7 +45,7 @@
 /* ── Logos row ── */
 .footer__row {
   width: 100%;
-  padding: 74px 0 74px;
+  padding: 35px 0;
 }
 
 /* full bleed but still aligned */
@@ -82,7 +81,7 @@
   align-items: center;
   justify-content: center;
 
-  gap: 34px;
+  gap: 26px;
   flex-wrap: wrap;
 
   overflow: visible;
@@ -98,7 +97,7 @@
 
 /* Default: make logos white */
 .footer__logo-img {
-  height: 34px;
+  height: 30px;
   width: auto;
   max-width: 180px;
   object-fit: contain;
@@ -106,32 +105,89 @@
   opacity: 0.95;
 }
 
-/* Caracol fix */
-.footer__logo:has(img[src$="/brand/Caracol.svg"]) .footer__logo-img,
-.footer__logo:has(img[src$="Caracol.svg"]) .footer__logo-img {
-  filter: none;
-  mix-blend-mode: screen;
-  opacity: 0.92;
-  transform: translateZ(0);
+/* ✅ small vertical divider inside logos row (between support and media) */
+.footer__divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.14);
+  flex: 0 0 1px;
 }
 
-/* Fallback if :has() isn't supported */
-.footer__logo-img--caracol {
-  filter: none;
-  mix-blend-mode: screen;
-  opacity: 0.92;
-  transform: translateZ(0);
+/* ✅ Links section */
+.footer__links {
+  padding: 35px 0 2px;
 }
 
-/* Copyright */
+.footer__links--withBottomSpace {
+  padding-bottom: 35px;
+}
+
+.footer__links-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 18px 34px;
+  align-items: end;
+  margin-bottom: 8px;
+}
+
+.footer__links-head .footer__links-title:first-child {
+  grid-column: 1 / span 2;
+}
+
+.footer__links-head .footer__links-title:last-child {
+  grid-column: 3 / span 2;
+  justify-self: start;
+}
+
+.footer__links-title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: -0.01em;
+}
+
+.footer__links-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 14px 34px;
+  align-items: start;
+
+  /* ✅ if it gets tight, allow horizontal scroll instead of wrapping */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.footer__link {
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+  font-size: 0.92rem;
+  line-height: 1.35;
+
+  /* ✅ keep in one line */
+  white-space: nowrap;
+}
+
+.footer__link:hover {
+  color: rgba(255, 255, 255, 0.86);
+  text-decoration: underline;
+}
+
+/* Copyright (currently not used, but leaving styles won't hurt) */
 .footer__copyright {
-  margin: 22px 0 40px;
+  margin: 12px 0 18px;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.55);
   text-align: center;
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .footer__link {
+    font-size: 0.88rem;
+  }
+}
+
 @media (max-width: 768px) {
   .footer__container {
     padding: 0 16px;
@@ -145,56 +201,25 @@
   .footer__row-inner {
     flex-direction: column;
     justify-content: center;
-    gap: 16px;
+    gap: 14px;
   }
 
-  .footer__organizer {
-    padding: 52px 0;
-    flex-direction: column;
-    gap: 12px;
+  .footer__divider {
+    display: none;
   }
 
-  .footer__organizer-label {
-    font-size: 1rem;
+  .footer__links-head {
+    grid-template-columns: 1fr;
   }
 
-  .footer__row {
-    padding: 40px 0;
+  .footer__links-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    overflow-x: visible; /* no scroll needed on 1-col */
   }
 
-  /* ✅ Mobile: make labels full-width, centered, and split rows visually */
-  .footer__row-label,
-  .footer__row-label--inline {
-    margin: 0;
-    width: 100%;
-    text-align: center;
-  }
-
-  .footer__row-logos {
-    gap: 18px 22px;
-  }
-
-  .footer__logo-img {
-    height: 26px;
-    max-width: 150px;
-  }
-
-  .footer__copyright {
-    margin: 16px 0 26px;
-    font-size: 0.8rem;
-    line-height: 1.35;
-    padding: 0 10px;
-  }
-}
-
-/* ✅ Extra small phones: tighten a bit more */
-@media (max-width: 420px) {
-  .footer__row-logos {
-    gap: 14px 18px;
-  }
-
-  .footer__logo-img {
-    height: 24px;
-    max-width: 135px;
+  /* ✅ keep mobile readable (allow wrapping) */
+  .footer__link {
+    white-space: normal;
   }
 }

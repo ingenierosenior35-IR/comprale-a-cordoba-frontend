@@ -1,33 +1,14 @@
 import Image from 'next/image';
 import './Footer.css';
 
-/**
- * ✅ Enabled logos (requested)
- * - El Titular
- * - RP Latam
- * - FundAcción
- * - Gobernación de Córdoba
- *
- * 🔁 To enable more logos later, just uncomment them below.
- */
 const SUPPORT_LOGOS = [
   { src: '/brand/gobernacion-cordoba.png', alt: 'Gobernación de Córdoba' },
   { src: '/brand/fundaccion.png', alt: 'FundAcción' },
-
-  // { src: '/brand/desarrollo-economico.svg', alt: 'Secretaría de Desarrollo Económico y Agroindustrial' },
-  // { src: '/brand/alcaldia-monteria.svg', alt: 'Alcaldía de Montería' },
-  // { src: '/brand/camara-comercio.svg', alt: 'Cámara de Comercio' },
 ];
 
 const MEDIA_LOGOS = [
   { src: '/brand/el-titular.png', alt: 'El Titular' },
   { src: '/brand/rp-latam.png', alt: 'RP Latam' },
-
-  // { src: '/brand/el-tiempo.png', alt: 'El Tiempo' },
-  // { src: '/brand/Caracol.svg', alt: 'Caracol' },
-  // { src: '/brand/ultima-hora.svg', alt: 'Última Hora' },
-  // { src: '/brand/accion-interna.svg', alt: 'Acción Interna' },
-  // { src: '/brand/Forbes.svg', alt: 'Forbes' },
 ];
 
 function Footer({ sponsors }) {
@@ -73,6 +54,8 @@ function Footer({ sponsors }) {
                 ))
               : null}
 
+            {showSupport && showMedia ? <span className="footer__divider" aria-hidden="true" /> : null}
+
             {showSupport && showMedia ? (
               <span className="footer__row-label footer__row-label--inline">Medios aliados:</span>
             ) : null}
@@ -86,10 +69,33 @@ function Footer({ sponsors }) {
         </div>
       </div>
 
+      <div className="footer__rule" />
+
       <div className="footer__container">
-        <p className="footer__copyright">
-          © {new Date().getFullYear()} Cómprale a Córdoba · Todos los derechos reservados · Inter Rapidísimo
-        </p>
+        <div className="footer__links footer__links--withBottomSpace" aria-label="Enlaces del pie de página">
+          <div className="footer__links-head">
+            <h4 className="footer__links-title">Servicio al cliente</h4>
+            <h4 className="footer__links-title">Aliados</h4>
+          </div>
+
+          <div className="footer__links-grid">
+            <a className="footer__link" href="/terminos-usuario" target="_self" rel="noreferrer">
+              Términos y condiciones del usuario
+            </a>
+
+            <a className="footer__link" href="#" target="_self" rel="noreferrer">
+              Términos y condiciones del seller
+            </a>
+
+            <a className="footer__link" href="https://www.sic.gov.co/" target="_blank" rel="noopener noreferrer">
+              Superintendencia Industria y Comercio
+            </a>
+
+            <a className="footer__link" href="https://sicfacilita.sic.gov.co/SICFacilita/index.xhtml" target="_blank" rel="noopener noreferrer">
+              SIC facilita
+            </a>
+          </div>
+        </div>
       </div>
     </footer>
   );

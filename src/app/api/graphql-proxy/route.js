@@ -2,6 +2,12 @@ import { env } from '../../../lib/env';
 
 const LOGIN_OPERATIONS = ['generateCustomerToken', 'revokeCustomerToken'];
 
+const ALLOWED_ORIGINS = new Set([
+  'https://www.compraleacordoba.com',
+  'https://compraleacordoba.com',
+  'http://localhost:3000',
+]);
+
 function isLoginOperation(body) {
   try {
     const query = body?.query || '';
@@ -11,19 +17,52 @@ function isLoginOperation(body) {
   }
 }
 
-export async function OPTIONS() {
-  return new Response(null, {
-    status: 204,
+function getCorsHeaders(request) {
+  const origin = (request?.headers?.get?.('origin') || '').trim();
+
+  if (!origin) return { headers: {}, origin: '' };
+
+  if (!ALLOWED_ORIGINS.has(origin)) return { headers: {}, origin };
+
+  return {
+    origin,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, store, Store',
+      'Access-Control-Max-Age': '86400',
+      Vary: 'Origin',
     },
+  };
+}
+
+export async function OPTIONS(request) {
+  const { headers, origin } = getCorsHeaders(request);
+
+  if (origin && Object.keys(headers).length === 0) {
+    return new Response(null, { status: 204 });
+  }
+
+  return new Response(null, {
+    status: 204,
+    headers,
   });
 }
 
 export async function POST(request) {
   const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  const { headers: corsHeaders, origin } = getCorsHeaders(request);
+
+  if (origin && Object.keys(corsHeaders).length === 0) {
+    return new Response(JSON.stringify({ message: 'CORS not allowed' }), {
+      status: 403,
+      headers: {
+        'Content-Type': 'application/json',
+        Vary: 'Origin',
+      },
+    });
+  }
 
   try {
     const body = await request.json();
@@ -69,7 +108,14 @@ export async function POST(request) {
         status: response.status,
         textPreview: text.slice(0, 300),
       });
-      return Response.json({ message: 'Upstream returned non-JSON', status: response.status }, { status: 502 });
+
+      return new Response(JSON.stringify({ message: 'Upstream returned non-JSON', status: response.status }), {
+        status: 502,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      });
     }
 
     if (!response.ok || data?.errors?.length) {
@@ -82,9 +128,22 @@ export async function POST(request) {
       console.log('[graphql-proxy] upstream ok', { requestId, status: response.status });
     }
 
-    return Response.json(data, { status: response.status });
+    return new Response(JSON.stringify(data), {
+      status: response.status,
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders,
+      },
+    });
   } catch (error) {
     console.error('[graphql-proxy] error:', { requestId, error });
-    return Response.json({ message: 'Proxy error' }, { status: 500 });
+
+    return new Response(JSON.stringify({ message: 'Proxy error' }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders,
+      },
+    });
   }
 }

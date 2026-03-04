@@ -3,7 +3,7 @@ import graphqlClient from '../lib/graphqlClient';
 import { SELLERS_WITH_PRODUCTS } from '../graphql/sellers/queries';
 import { normalizeSellersWithProductsResponse } from '../utils/mediaUrl';
 
-export function useSellersWithProductsInfinite({ pageSize = 20, productLimit = 6 } = {}) {
+export function useSellersWithProductsInfinite({ pageSize = 20, productLimit = 60 } = {}) {
   return useInfiniteQuery({
     queryKey: ['sellersWithProductsInfinite', pageSize, productLimit],
     initialPageParam: 1,

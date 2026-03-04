@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef, useLayoutEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSellerById } from '../../hooks/useSellerById';
 import { useProductsBySellerInfinite } from '../../hooks/useProductsBySellerInfinite';
@@ -73,6 +73,38 @@ export default function SellerDetailPageView({ id }) {
     rootMargin: '900px',
   });
 
+  const descRef = useRef(null);
+  const [descUseNarrow, setDescUseNarrow] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = descRef.current;
+    if (!el) return;
+
+    const check = () => {
+      el.classList.remove('sdp-hero__descText--narrow');
+      el.classList.add('sdp-hero__descText--full');
+
+      const styles = window.getComputedStyle(el);
+      const fontSize = parseFloat(styles.fontSize) || 16;
+
+      // line-height might be "normal" -> approximate
+      const rawLineHeight = styles.lineHeight;
+      const parsedLineHeight = parseFloat(rawLineHeight);
+      const lineHeight = Number.isFinite(parsedLineHeight) ? parsedLineHeight : fontSize * 1.2;
+
+      // If height is more than ~1 line, we consider it wrapped => switch to narrow
+      const isMultiLine = el.scrollHeight > lineHeight * 1.6; // tolerance
+      setDescUseNarrow(isMultiLine);
+    };
+
+    check();
+
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+
+    return () => ro.disconnect();
+  }, [sellerDescription]);
+
   if (loading) {
     return (
       <div className="seller-detail-page">
@@ -115,10 +147,16 @@ export default function SellerDetailPageView({ id }) {
               <h1 className="sdp-hero__title">{sellerName}</h1>
             </div>
 
-            {/* ✅ only description below image */}
             {sellerDescription ? (
               <div className="sdp-hero__descCard" aria-label="Descripción del negocio">
-                <p className="sdp-hero__descText">{sellerDescription}</p>
+                <p
+                  ref={descRef}
+                  className={`sdp-hero__descText ${
+                    descUseNarrow ? 'sdp-hero__descText--narrow' : 'sdp-hero__descText--full'
+                  }`}
+                >
+                  {sellerDescription}
+                </p>
               </div>
             ) : null}
           </div>

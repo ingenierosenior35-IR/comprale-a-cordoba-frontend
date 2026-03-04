@@ -42,7 +42,7 @@ function mapProductsFromApi(items = [], sellerId) {
     }));
 }
 
-function SellerCard({ seller, onViewDetail }) {
+function SellerCard({ seller, onViewDetail, disableProductsFetch = false }) {
   const router = useRouter();
   const scrollRef = useRef(null);
 
@@ -52,14 +52,37 @@ function SellerCard({ seller, onViewDetail }) {
   const sellerImage = seller?.logo_pic || seller?.banner_pic || SELLER_PLACEHOLDER;
   const sellerDescription = stripHtml(seller?.description);
 
-  const qProducts = useProductsBySeller({ sellerId, pageSize: 12, currentPage: 1, enabled: true });
+  // ✅ IMPORTANT: in Home we must NOT call productsBySeller per seller
+  const qProducts = useProductsBySeller({
+    sellerId,
+    pageSize: 12,
+    currentPage: 1,
+    enabled: !disableProductsFetch, // ✅ disable fetch in Home
+  });
 
   const products = useMemo(() => {
+    if (disableProductsFetch) {
+      const fallbackOnly = Array.isArray(seller?.products) ? seller.products : [];
+      return fallbackOnly
+        .filter(isValidProduct)
+        .map((p, idx) => ({
+          id: String(p?.id ?? p?.sku ?? `${sellerId || 'seller'}-${idx}`),
+          sku: p?.sku || p?.id || null,
+          productId: p?.productId ?? null,
+          stock: p?.stock ?? null,
+          name: p?.name || '',
+          price: p?.price ?? 0,
+          currency: 'COP',
+          image: p?.image || PRODUCT_PLACEHOLDER,
+          description: p?.description || '',
+        }));
+    }
+
     // Prefer API productsBySeller if present
     const apiItems = qProducts.data?.productsBySeller?.items;
     if (Array.isArray(apiItems) && apiItems.length) return mapProductsFromApi(apiItems, sellerId);
 
-    // Fallback to sellersWithProducts preloaded products (already mapped)
+    // Fallback to sellersWithProducts preloaded products
     const fallback = Array.isArray(seller?.products) ? seller.products : [];
     return fallback
       .filter(isValidProduct)
@@ -74,12 +97,12 @@ function SellerCard({ seller, onViewDetail }) {
         image: p?.image || PRODUCT_PLACEHOLDER,
         description: p?.description || '',
       }));
-  }, [qProducts.data, seller?.products, sellerId]);
+  }, [disableProductsFetch, qProducts.data, seller?.products, sellerId]);
 
   const canScroll = products.length > 0;
 
-  // ✅ When API finished loading and we still have 0 valid products, don't render the seller
-  if (!qProducts.isLoading && products.length === 0) return null;
+  if (!disableProductsFetch && !qProducts.isLoading && products.length === 0) return null;
+  if (disableProductsFetch && products.length === 0) return null;
 
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
@@ -139,7 +162,7 @@ function SellerCard({ seller, onViewDetail }) {
           products={products}
           sellerId={sellerId}
           sellerName={sellerName}
-          loading={qProducts.isLoading}
+          loading={!disableProductsFetch ? qProducts.isLoading : false}
           visibleCount={3}
           onLimitsChange={handleLimitsChange}
         />

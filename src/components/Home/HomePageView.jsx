@@ -40,10 +40,8 @@ export default function HomePageView() {
     rootMargin: '900px',
   });
 
-
     return (
     <div className="home-page">
-      {/* ✅ this must be inside Suspense because it uses useSearchParams */}
       <Suspense fallback={null}>
         <OrderSuccessFromUrl />
       </Suspense>
@@ -53,9 +51,7 @@ export default function HomePageView() {
         <Hero nextSectionRef={howItWorksSectionRef} />
         <HowItWorks sectionRef={howItWorksSectionRef} />
 
-        {/* ✅ Home sellers section WITHOUT the "Los emprendedores" text */}
         <section className="home-sellers" aria-label="Emprendedores destacados">
-          <SellerSection sellers={sellers} onSellerClick={(seller) => router.push(`/seller/${seller.id}`)} />
           <SellerSection
             sellers={sellers}
             disableProductsFetch={true}
@@ -75,7 +71,6 @@ export default function HomePageView() {
         </section>
 
         <div ref={sentinelRef} className="home-infinite__sentinel" />
-        {/* <Stats stats={stats} /> */}
         <Footer sponsors={[]} />
       </main>
     </div>

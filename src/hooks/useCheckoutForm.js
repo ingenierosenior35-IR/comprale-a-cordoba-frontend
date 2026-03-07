@@ -11,6 +11,9 @@ import { CREATE_GUEST_CART, ADD_PRODUCTS_TO_CART, CREATE_CHECKOUT_PAYMENT } from
 export const ID_TYPES = ['C.C', 'C.E', 'Pasaporte', 'NIT'];
 export const PAYMENT_METHODS = ['Nequi', 'VISA', 'Mastercard', 'G Pay', 'Pay'];
 
+// Store code para Magento — debe coincidir con ALCARRITO_STORE_CODE en .env
+const STORE_CODE = process.env.NEXT_PUBLIC_ALCARRITO_STORE_CODE || 'compralecordoba';
+
 function stableCartSignature(items) {
   return (items || [])
     .map((i) => `${i?.product?.sku || i?.product?.id}:${i?.quantity || 0}`)
@@ -315,7 +318,6 @@ export function useCheckoutForm() {
   };
 
   const handleSubmit = async (e, opts = {}) => {
-    // ✅ Prevenir submit nativo siempre como primera línea
     if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
     const { recaptchaToken } = opts;
@@ -338,24 +340,35 @@ export function useCheckoutForm() {
     const lastname = form.lastName.trim();
     const vatId = form.idNumber.trim();
 
+    // ✅ Headers comunes para todas las peticiones del checkout
+    const checkoutHeaders = {
+      store: STORE_CODE,
+    };
+
     try {
-      const cartData = await graphqlGuestClient.request(CREATE_GUEST_CART);
+      // 1. Crear carrito guest
+      const cartData = await graphqlGuestClient.request(CREATE_GUEST_CART, {}, checkoutHeaders);
       const checkoutCartId = cartData?.createGuestCart?.cart?.id;
       if (!checkoutCartId) throw new Error('No se pudo crear el carrito invitado.');
 
+      // 2. Agregar productos al carrito
       const cartItems = items.map((i) => ({
         parent_sku: i.product.parent_sku || null,
         sku: i.product.sku || i.product.id,
         quantity: i.quantity,
       }));
 
-      const addRes = await graphqlGuestClient.request(ADD_PRODUCTS_TO_CART, { cartId: checkoutCartId, cartItems });
+      const addRes = await graphqlGuestClient.request(
+        ADD_PRODUCTS_TO_CART,
+        { cartId: checkoutCartId, cartItems },
+        checkoutHeaders
+      );
       const userErrors = addRes?.addProductsToCart?.user_errors || [];
       if (userErrors.length) throw new Error(userErrors[0]?.message || 'Error agregando productos al carrito.');
 
       const regionIdInt = Number(form.regionId);
 
-      // ✅ Enviar el token con el header exacto X-ReCaptcha (casing exacto)
+      // 3. Crear pago — enviar store + X-ReCaptcha
       const checkoutPaymentRes = await graphqlGuestClient.request(
         CREATE_CHECKOUT_PAYMENT,
         {
@@ -369,7 +382,10 @@ export function useCheckoutForm() {
           telephone: form.phone,
           vatId,
         },
-        { 'X-ReCaptcha': recaptchaToken }
+        {
+          ...checkoutHeaders,           // ✅ store
+          'X-ReCaptcha': recaptchaToken, // ✅ token de reCAPTCHA
+        }
       );
 
       const payment = checkoutPaymentRes?.CreateCheckoutPayment?.payment || null;

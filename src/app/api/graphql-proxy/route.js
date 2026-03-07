@@ -26,37 +26,6 @@ function isCheckoutPaymentOperation(body) {
   }
 }
 
-async function verifyRecaptchaToken(token) {
-  const secret = process.env.RECAPTCHA_SECRET_KEY;
-  if (!secret) return { ok: false, reason: 'missing_secret' };
-  if (!token) return { ok: false, reason: 'missing_token' };
-
-  const form = new URLSearchParams();
-  form.set('secret', secret);
-  form.set('response', token);
-
-  const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: form,
-  });
-
-  const data = await res.json();
-  const success = Boolean(data?.success);
-  const score = typeof data?.score === 'number' ? data.score : 0;
-
-  const MIN_SCORE = 0.5;
-
-  return {
-    ok: success && score >= MIN_SCORE,
-    success,
-    score,
-    action: data?.action || null,
-    hostname: data?.hostname || null,
-    errorCodes: data?.['error-codes'] || null,
-  };
-}
-
 function getCorsHeaders(request) {
   const origin = (request?.headers?.get?.('origin') || '').trim();
 
@@ -105,33 +74,26 @@ export async function POST(request) {
     const body = await request.json();
     const url = env.ALCARRITO_GRAPHQL_URL;
 
-    // ✅ Leer el token con ambas variantes por si HTTP/2 normaliza a minúsculas
+    // Leer token reCAPTCHA — tolerante a normalización de casing HTTP/2
     const recaptchaToken = (
       request.headers.get('X-ReCaptcha') ||
       request.headers.get('x-recaptcha') ||
+      request.headers.get('X-Recaptcha') ||
       ''
     ).trim();
 
-    // Validar reCAPTCHA en el proxy antes de llamar al upstream
-    if (isCheckoutPaymentOperation(body)) {
-      const verdict = await verifyRecaptchaToken(recaptchaToken);
-
-      if (!verdict.ok) {
-        return new Response(JSON.stringify({ message: 'reCAPTCHA verification failed', details: verdict }), {
-          status: 403,
-          headers: {
-            'Content-Type': 'application/json',
-            ...corsHeaders,
-          },
-        });
-      }
-    }
-
-    const incomingStore = (request.headers.get('store') || request.headers.get('Store') || '').trim();
+    // Store: prioridad al header entrante, fallback a variable de entorno
+    const incomingStore = (
+      request.headers.get('store') ||
+      request.headers.get('Store') ||
+      ''
+    ).trim();
     const storeToSend = (incomingStore || env.ALCARRITO_STORE_CODE || '').trim();
 
+    // Construir headers para el upstream de Magento
     const forwardHeaders = {
       'Content-Type': 'application/json',
+      // ✅ Siempre mandar store — Magento lo necesita en TODAS las operaciones
       ...(storeToSend ? { store: storeToSend } : {}),
     };
 
@@ -140,11 +102,23 @@ export async function POST(request) {
       forwardHeaders.Authorization = authHeader;
     }
 
-    // ✅ FIX CRÍTICO: reenviar X-ReCaptcha al upstream de Magento
-    // con el casing exacto que Magento espera
+    // ✅ FIX PRINCIPAL: reenviar X-ReCaptcha a Magento SIN consumirlo aquí
+    // Los tokens reCAPTCHA v3 son de UN SOLO USO — si el proxy los valida
+    // con Google primero, Magento los rechaza porque ya fueron consumidos.
+    // Magento tiene su propia validación integrada, solo hay que pasarle el token.
     if (isCheckoutPaymentOperation(body) && recaptchaToken) {
       forwardHeaders['X-ReCaptcha'] = recaptchaToken;
     }
+
+    console.log('[graphql-proxy] -> upstream', {
+      requestId,
+      url,
+      store: storeToSend || null,
+      operationName: body?.operationName || null,
+      hasVariables: Boolean(body?.variables),
+      hasRecaptcha: isCheckoutPaymentOperation(body) ? Boolean(recaptchaToken) : 'n/a',
+      queryPreview: typeof body?.query === 'string' ? body.query.slice(0, 120) : null,
+    });
 
     const response = await fetch(url, {
       method: 'POST',
@@ -163,10 +137,10 @@ export async function POST(request) {
         textPreview: text.slice(0, 300),
       });
 
-      return new Response(JSON.stringify({ message: 'Upstream returned non-JSON', status: response.status }), {
-        status: 502,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      });
+      return new Response(
+        JSON.stringify({ message: 'Upstream returned non-JSON', status: response.status }),
+        { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
     }
 
     if (!response.ok || data?.errors?.length) {
@@ -186,9 +160,9 @@ export async function POST(request) {
   } catch (error) {
     console.error('[graphql-proxy] error:', { requestId, error });
 
-    return new Response(JSON.stringify({ message: 'Proxy error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders },
-    });
+    return new Response(
+      JSON.stringify({ message: 'Proxy error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
   }
 }

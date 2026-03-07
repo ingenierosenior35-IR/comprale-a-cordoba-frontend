@@ -15,30 +15,6 @@ import OrderSuccessFromUrl from '../OrderSuccessModal/OrderSuccessFromUrl';
 import { mapSellersWithProducts } from '../../utils/mapSellers';
 import './HomePageView.css';
 
-const PINNED_SELLER_ID = 341734; // Papelería y Miscelánea Calixto
-
-function pinSellerFirst(list, pinnedId) {
-  const arr = Array.isArray(list) ? list : [];
-  const pinnedIdStr = String(pinnedId);
-
-  // ✅ de-dupe in case the seller appears across multiple pages
-  const seen = new Set();
-  const unique = [];
-  for (const s of arr) {
-    const id = String(s?.id ?? '');
-    if (!id) continue;
-    if (seen.has(id)) continue;
-    seen.add(id);
-    unique.push(s);
-  }
-
-  const idx = unique.findIndex((s) => String(s?.id) === pinnedIdStr);
-  if (idx === -1) return unique;
-
-  const [pinned] = unique.splice(idx, 1);
-  return [pinned, ...unique];
-}
-
 export default function HomePageView() {
   const howItWorksSectionRef = useRef(null);
   const router = useRouter();
@@ -48,10 +24,7 @@ export default function HomePageView() {
   const sellers = useMemo(() => {
     const pages = q.data?.pages || [];
     const allItems = pages.flatMap((p) => p?.sellersWithProducts?.items || []);
-    const mapped = mapSellersWithProducts(allItems);
-
-    // ✅ force Calixto first
-    return pinSellerFirst(mapped, PINNED_SELLER_ID);
+    return mapSellersWithProducts(allItems);
   }, [q.data]);
 
   const canLoadMore = !!q.hasNextPage && !q.isFetchingNextPage;
@@ -67,8 +40,10 @@ export default function HomePageView() {
     rootMargin: '900px',
   });
 
-  return (
+
+    return (
     <div className="home-page">
+      {/* ✅ this must be inside Suspense because it uses useSearchParams */}
       <Suspense fallback={null}>
         <OrderSuccessFromUrl />
       </Suspense>
@@ -78,7 +53,9 @@ export default function HomePageView() {
         <Hero nextSectionRef={howItWorksSectionRef} />
         <HowItWorks sectionRef={howItWorksSectionRef} />
 
+        {/* ✅ Home sellers section WITHOUT the "Los emprendedores" text */}
         <section className="home-sellers" aria-label="Emprendedores destacados">
+          <SellerSection sellers={sellers} onSellerClick={(seller) => router.push(`/seller/${seller.id}`)} />
           <SellerSection
             sellers={sellers}
             disableProductsFetch={true}
@@ -98,6 +75,7 @@ export default function HomePageView() {
         </section>
 
         <div ref={sentinelRef} className="home-infinite__sentinel" />
+        {/* <Stats stats={stats} /> */}
         <Footer sponsors={[]} />
       </main>
     </div>

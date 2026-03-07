@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -18,6 +19,7 @@ function stableCartSignature(items) {
     .join('|');
 }
 
+// ✅ helper: execute recaptcha without changing the submit flow
 export function useCheckoutForm() {
   const router = useRouter();
   const { items, total, updateQuantity, clearCart } = useCart();
@@ -99,7 +101,6 @@ export function useCheckoutForm() {
     if (delta > THRESHOLD) animateSummaryTo(false);
   };
 
-  // Desktop: close city popover on outside click / ESC
   useEffect(() => {
     if (!cityDesktopOpen) return;
 
@@ -132,7 +133,6 @@ export function useCheckoutForm() {
     };
   }, [cityDesktopOpen]);
 
-  // Mobile: keep city modal ABOVE keyboard via VisualViewport
   useEffect(() => {
     if (!cityMobileOpen) return;
 
@@ -316,12 +316,19 @@ export function useCheckoutForm() {
     return errs;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, opts = {}) => {
     e.preventDefault();
+
+    const { recaptchaToken } = opts;
 
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      return;
+    }
+
+    if (!recaptchaToken) {
+      setSubmitError('No fue posible validar reCAPTCHA. Recarga e intenta de nuevo.');
       return;
     }
 
@@ -349,23 +356,29 @@ export function useCheckoutForm() {
 
       const regionIdInt = Number(form.regionId);
 
-      const checkoutPaymentRes = await graphqlGuestClient.request(CREATE_CHECKOUT_PAYMENT, {
-        cartId: checkoutCartId,
-        email: form.email,
-        firstname,
-        lastname,
-        street: form.address,
-        city: form.cityName,
-        regionId: regionIdInt,
-        telephone: form.phone,
-        vatId,
-      });
+      // ✅ Send reCAPTCHA token in header "X-ReCaptcha" ONLY for the payment mutation
+      const checkoutPaymentRes = await graphqlGuestClient.request(
+        CREATE_CHECKOUT_PAYMENT,
+        {
+          cartId: checkoutCartId,
+          email: form.email,
+          firstname,
+          lastname,
+          street: form.address,
+          city: form.cityName,
+          regionId: regionIdInt,
+          telephone: form.phone,
+          vatId,
+        },
+        { 'X-ReCaptcha': recaptchaToken }
+      );
 
       const payment = checkoutPaymentRes?.CreateCheckoutPayment?.payment || null;
       const paymentUrl = payment?.url_payment || null;
 
       clearCart();
 
+      // ✅ keep original redirect behavior
       if (paymentUrl) window.location.href = paymentUrl;
       else throw new Error('No se recibió la URL de pago.');
     } catch (err) {
@@ -376,14 +389,12 @@ export function useCheckoutForm() {
   };
 
   return {
-    // Form state
     form,
     errors,
     processing,
     submitError,
     termsOpen,
     setTermsOpen,
-    // Cart summary
     items,
     total,
     shippingCost,
@@ -392,7 +403,6 @@ export function useCheckoutForm() {
     shippingLoading,
     canSubmit,
     updateQuantity,
-    // City picker state
     cityDesktopOpen,
     setCityDesktopOpen,
     cityMobileOpen,
@@ -404,10 +414,8 @@ export function useCheckoutForm() {
     cityDesktopInputRef,
     cityMobileSheetRef,
     cityMobileInputRef,
-    // Mobile summary state
     mobileSummaryOpen,
     summaryRef,
-    // Handlers
     handleChange,
     handleCitySelect,
     openCityPicker,
@@ -416,7 +424,6 @@ export function useCheckoutForm() {
     handleSummaryTouchStart,
     handleSummaryTouchMove,
     handleSummaryTouchEnd,
-    // Navigation
     router,
   };
 }

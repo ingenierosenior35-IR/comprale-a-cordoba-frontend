@@ -17,6 +17,46 @@ function isLoginOperation(body) {
   }
 }
 
+function isCheckoutPaymentOperation(body) {
+  try {
+    const q = body?.query || '';
+    return q.includes('CreateCheckoutPayment');
+  } catch {
+    return false;
+  }
+}
+
+async function verifyRecaptchaToken(token) {
+  const secret = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secret) return { ok: false, reason: 'missing_secret' };
+  if (!token) return { ok: false, reason: 'missing_token' };
+
+  const form = new URLSearchParams();
+  form.set('secret', secret);
+  form.set('response', token);
+
+  const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form,
+  });
+
+  const data = await res.json();
+  const success = Boolean(data?.success);
+  const score = typeof data?.score === 'number' ? data.score : 0;
+
+  const MIN_SCORE = 0.5;
+
+  return {
+    ok: success && score >= MIN_SCORE,
+    success,
+    score,
+    action: data?.action || null,
+    hostname: data?.hostname || null,
+    errorCodes: data?.['error-codes'] || null,
+  };
+}
+
 function getCorsHeaders(request) {
   const origin = (request?.headers?.get?.('origin') || '').trim();
 
@@ -29,7 +69,7 @@ function getCorsHeaders(request) {
     headers: {
       'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, store, Store',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, store, Store, X-ReCaptcha',
       'Access-Control-Max-Age': '86400',
       Vary: 'Origin',
     },
@@ -43,10 +83,7 @@ export async function OPTIONS(request) {
     return new Response(null, { status: 204 });
   }
 
-  return new Response(null, {
-    status: 204,
-    headers,
-  });
+  return new Response(null, { status: 204, headers });
 }
 
 export async function POST(request) {
@@ -68,8 +105,22 @@ export async function POST(request) {
     const body = await request.json();
     const url = env.ALCARRITO_GRAPHQL_URL;
 
-    // If a store is provided by the incoming request, it wins.
-    // Otherwise use env. If neither is set, OMIT the header (staging/tests).
+    // ✅ enforce recaptcha only for payment mutation
+    if (isCheckoutPaymentOperation(body)) {
+      const token = (request.headers.get('X-ReCaptcha') || '').trim();
+      const verdict = await verifyRecaptchaToken(token);
+
+      if (!verdict.ok) {
+        return new Response(JSON.stringify({ message: 'reCAPTCHA verification failed', details: verdict }), {
+          status: 403,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        });
+      }
+    }
+
     const incomingStore = (request.headers.get('store') || request.headers.get('Store') || '').trim();
     const storeToSend = (incomingStore || env.ALCARRITO_STORE_CODE || '').trim();
 
@@ -111,10 +162,7 @@ export async function POST(request) {
 
       return new Response(JSON.stringify({ message: 'Upstream returned non-JSON', status: response.status }), {
         status: 502,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
@@ -130,20 +178,14 @@ export async function POST(request) {
 
     return new Response(JSON.stringify(data), {
       status: response.status,
-      headers: {
-        'Content-Type': 'application/json',
-        ...corsHeaders,
-      },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
   } catch (error) {
     console.error('[graphql-proxy] error:', { requestId, error });
 
     return new Response(JSON.stringify({ message: 'Proxy error' }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        ...corsHeaders,
-      },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
   }
 }

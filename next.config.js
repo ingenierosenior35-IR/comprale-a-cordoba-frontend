@@ -4,11 +4,12 @@ const csp = [
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: https://www.google.com https://www.gstatic.com https://recaptcha.google.com",
+  "frame-src 'self' https://www.google.com https://recaptcha.google.com",
+  "connect-src 'self' https: wss: https://www.google.com https://www.gstatic.com https://recaptcha.google.com",
   "img-src 'self' https: data:",
   "font-src 'self' https: data:",
   "style-src 'self' 'unsafe-inline' https:",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
-  "connect-src 'self' https: wss:",
 ].join('; ');
 
 const nextConfig = {

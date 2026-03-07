@@ -1,3 +1,4 @@
+
 'use client';
 
 import Navbar from '../Navbar/Navbar';
@@ -8,6 +9,7 @@ import CheckoutItem from './CheckoutItem';
 import CheckoutCityMobileModal from './CheckoutCityMobileModal';
 import CheckoutFormSection from './CheckoutFormSection';
 import CheckoutSummaryTotals from './CheckoutSummaryTotals';
+import { useRecaptchaV3 } from '../../hooks/useRecaptchaV3';
 import './Checkout.css';
 
 export default function CheckoutForm() {
@@ -49,6 +51,10 @@ export default function CheckoutForm() {
     router,
   } = useCheckoutForm();
 
+  // ✅ reCAPTCHA v3
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+  const { ready: recaptchaReady, getToken } = useRecaptchaV3(siteKey);
+
   const cityProps = {
     cityDesktopOpen,
     cityDesktopPopoverRef,
@@ -61,13 +67,17 @@ export default function CheckoutForm() {
     onCitySelect: handleCitySelect,
   };
 
+  // ✅ Important: keep original canSubmit behavior for enabling/disabling button
+  // but ALSO require recaptcha to be ready before enabling payment.
+  const canPay = Boolean(canSubmit && recaptchaReady);
+
   const summaryProps = {
     total,
     shippingCost,
     grandTotal,
     cartSyncing,
     shippingLoading,
-    canSubmit,
+    canSubmit: canPay, // ✅ button enabled only if form is valid + recaptcha ready
     processing,
   };
 
@@ -77,7 +87,7 @@ export default function CheckoutForm() {
         <Navbar />
         <main className="checkout__empty">
           <p>Tu carrito está vacío.</p>
-          <button className="checkout__back-btn" onClick={() => router.push('/')}>
+          <button className="checkout__back-btn" onClick={() => router.push('/')} type="button">
             Volver al inicio
           </button>
         </main>
@@ -110,14 +120,22 @@ export default function CheckoutForm() {
           </div>
         )}
 
-        <form className="checkout__grid" onSubmit={handleSubmit} noValidate>
-          <CheckoutFormSection
-            form={form}
-            errors={errors}
-            handleChange={handleChange}
-            setTermsOpen={setTermsOpen}
-            cityProps={cityProps}
-          />
+        <form
+          className="checkout__grid"
+          onSubmit={async (e) => {
+            // preserve original behavior: useCheckoutForm handles validation and redirect
+            // only add: generate token and pass it down
+            if (!recaptchaReady) {
+              e.preventDefault();
+              return;
+            }
+
+            const token = await getToken('checkout_submit');
+            return handleSubmit(e, { recaptchaToken: token });
+          }}
+          noValidate
+        >
+          <CheckoutFormSection form={form} errors={errors} handleChange={handleChange} setTermsOpen={setTermsOpen} cityProps={cityProps} />
 
           {/* Desktop summary */}
           <section className="checkout__col checkout__col--summary checkout__summary-desktop" aria-label="Resumen de compra">
@@ -132,6 +150,13 @@ export default function CheckoutForm() {
             </div>
             <div className="checkout__summary-bottom">
               <CheckoutSummaryTotals {...summaryProps} />
+
+              {/* Optional small hint */}
+              {canSubmit && !recaptchaReady ? (
+                <p style={{ marginTop: 10, color: 'rgba(255,255,255,0.65)', fontSize: 12 }}>
+                  Verificando seguridad…
+                </p>
+              ) : null}
             </div>
           </section>
 
@@ -177,3 +202,4 @@ export default function CheckoutForm() {
     </div>
   );
 }
+
